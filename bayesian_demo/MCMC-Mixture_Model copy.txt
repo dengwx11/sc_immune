@@ -1,0 +1,70 @@
+set.seed(45436)
+n<-100
+mu_true<-c(5,10)
+sigma2_true<-1
+p_true<-0.75
+g_true<-rbinom(n,size=1,prob=p_true)
+y<-rnorm(n=n,mean=mu_true[g_true + 1],sd=sqrt(sigma2_true))
+hist(y)
+
+
+mc_num<-5000
+
+mu<-matrix(0,nrow=mc_num,ncol=2)
+sigma2<-rep(0,times=mc_num)
+g<-matrix(0,nrow=mc_num,ncol=n)
+p<-rep(0,times=mc_num)
+
+mu[1,]<-c(5,10)
+sigma2[1]<-1
+p[1]<-0.75
+g[1,]<-g_true
+
+for(i in 2:mc_num){
+   
+   #sigma2 Update
+   sigma2[i]<-1/rgamma(n=1,((n/2) + 0.01), (sum((y-mu[(i-1),(g[(i-1),]+1)])^2)/2 + 0.01))
+    
+   #g Update
+   for(j in 1:n){
+      p1_temp<-exp((-1/(2*sigma2[i]))*(y[j]-mu[(i-1),2])^2)*p[i-1]
+      p0_temp<-exp((-1/(2*sigma2[i]))*(y[j]-mu[(i-1),1])^2)*(1-p[i-1])
+      p_temp<-p1_temp/(p0_temp + p1_temp)
+      g[i,j]<-rbinom(n=1,size=1,prob=p_temp)
+      }
+   
+   #p Update
+   p[i]<-rbeta(n=1,(sum(g[i,]) + 1), (n - sum(g[i,]) + 1))
+
+   #mu_1 Update
+   set_A<-c(1:n)[g[i,]==1]
+   n_A<-sum(g[i,]==1)
+   if(n_A==0){
+     mu[i,2]<-rnorm(n=1,mean=0,sd=sqrt(100))
+     }
+   if(n_A>0){
+     mean_temp<-100*n_A*mean(y[set_A])/(100*n_A + sigma2[i])
+     var_temp<-100*sigma2[i]/(100*n_A + sigma2[i])
+     mu[i,2]<-rnorm(n=1,mean=mean_temp,sd=sqrt(var_temp))
+     }
+    
+   #mu_0 Update
+   set_A<-c(1:n)[g[i,]==0]
+   n_A<-sum(g[i,]==0)
+   if(n_A==0){
+     mu[i,1]<-rnorm(n=1,mean=0,sd=sqrt(100))
+     }
+   if(n_A>0){
+     mean_temp<-100*n_A*mean(y[set_A])/(100*n_A + sigma2[i])
+     var_temp<-100*sigma2[i]/(100*n_A + sigma2[i])
+     mu[i,1]<-rnorm(n=1,mean=mean_temp,sd=sqrt(var_temp))
+     }
+  
+   print(i/mc_num)
+   }
+
+
+
+
+
+

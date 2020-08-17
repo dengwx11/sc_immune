@@ -1,0 +1,72 @@
+library(geoR)
+set.seed(54634)
+n<-100
+y<-rnorm(n,mean=3.5,sd=0.5)
+
+y_bar<-mean(y)
+s2<-var(y)
+
+############
+#Option 2
+############
+#MC Sampling
+mc_num<-100000
+mu<-rep(0,times=mc_num)
+sigma2<-rep(0,times=mc_num)
+
+for(i in 1:mc_num){
+   #sigma2[i]<-rinvchisq(n=1,df=(n-1),scale=s2)
+   sigma2[i]<-1/rgamma(n=1,((n+1)/2 - 1), ((n-1)*s2/2) )
+   mu[i]<-rnorm(n=1,mean=y_bar,sd=sqrt(sigma2[i]/n))
+   }
+
+#Joint Posterior
+plot(mu,sigma2)
+
+#Marginal Posteriors
+par(mfrow=c(2,1))
+hist(mu)
+hist(sigma2)
+
+#Transformations
+par(mfrow=c(2,1))
+hist(sqrt(sigma2))
+hist(sqrt(sigma2)/mu)  #Coefficient of variation (sigma/mu=0.5/3.5)
+
+
+############
+#Option 3
+############
+#MC Sampling
+mc_num<-100000
+mu<-rep(0,times=mc_num)
+sigma2<-rep(0,times=mc_num)
+
+for(i in 1:mc_num){
+   mu[i]<-(rt(n=1,df=(n-1)))*sqrt(s2/n) + y_bar
+   sigma2[i]<-1/rgamma(n=1,shape=(n/2),rate=(n*(0.5)*((mu[i]-y_bar)^2) + ((n-1)*s2/2)) )
+   }
+
+#Joint Posterior
+plot(mu,sigma2)
+
+#Marginal Posteriors
+par(mfrow=c(2,1))
+hist(mu)
+hist(sigma2)
+
+#Transformations
+par(mfrow=c(2,1))
+hist(sqrt(sigma2))
+hist(sqrt(sigma2)/mu)  #Coefficient of variation (sigma/mu=0.5/3.5)
+
+##################################
+#Posterior Predictive Distribution
+##################################
+
+y_new<-rnorm(n=mc_num,mean=mu,sd=sqrt(sigma2))
+hist(y_new)
+
+
+
+

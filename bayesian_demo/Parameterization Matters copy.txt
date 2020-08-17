@@ -1,0 +1,13 @@
+
+
+#theta~Uni(0,1); eta=log(theta/(1-theta))
+eta<-seq(-10,10,0.10)
+f<-exp(eta)/((1+exp(eta))^2)
+plot(eta,f,type="l",lwd=3)
+
+#MC Version
+theta<-runif(1000000,0,1)
+eta<-log(theta/(1-theta))
+hist(eta,freq=FALSE,add=TRUE)
+
+

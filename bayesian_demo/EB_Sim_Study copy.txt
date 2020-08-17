@@ -1,0 +1,78 @@
+nsims <- 1000 #Number of simulated data sets
+n <- 5        #sample size of each data set
+#n <- 100
+sigma <- 1    #True sd
+mu <- 0       #True mean
+
+MEAN<-SD<-LOW<-HIGH<-matrix(0,nsims,4)
+
+colnames(MEAN)<-colnames(SD)<-colnames(LOW)<-
+colnames(HIGH)<-c("Sigma known","EB","FB, vague prior","FB, informative prior")
+
+for(sim in 1:nsims){
+
+   #Generate data
+   y <- rnorm(n,mu,sigma)
+   s <- sd(y)
+   ybar <- mean(y)
+   SSE <- sum((y-ybar)^2)
+
+   #sigma known method
+   samps <- rnorm(50000,ybar,sigma/sqrt(n))
+   MEAN[sim,1] <- mean(samps)
+   SD[sim,1] <- sd(samps)
+   LOW[sim,1] <- quantile(samps,0.025)
+   HIGH[sim,1] <- quantile(samps,0.975)
+
+   #EB method
+   samps <- rnorm(50000,ybar,s/sqrt(n))
+   MEAN[sim,2] <- mean(samps)
+   SD[sim,2] <- sd(samps)
+   LOW[sim,2] <- quantile(samps,0.025)
+   HIGH[sim,2] <- quantile(samps,0.975)
+
+   #FB method with an Inv(0.01,0.01) prior for sigmaˆ2
+   a <- 0.01
+   b <- 0.01
+   scale <- sqrt((SSE+2*b)/(n-1+2*a))/sqrt(n)
+   df <- n-1+2*a
+   samps <- ybar+scale*rt(50000,df=df)
+   MEAN[sim,3] <- mean(samps)
+   SD[sim,3] <- sd(samps)
+   LOW[sim,3] <- quantile(samps,0.025)
+   HIGH[sim,3] <- quantile(samps,0.975)
+
+   #FB method with an Inv(10,10) prior for sigmaˆ2
+   a <- 10
+   b <- 10
+   scale <- sqrt((SSE+2*b)/(n-1+2*a))/sqrt(n)
+   df <- n-1+2*a
+   samps <- ybar+scale*rt(50000,df=df)
+   MEAN[sim,4] <- mean(samps)
+   SD[sim,4] <- sd(samps)
+   LOW[sim,4] <- quantile(samps,0.025)
+   HIGH[sim,4] <- quantile(samps,0.975)
+   print(sim/nsims)
+   }
+
+
+
+#Compile results
+MSE <- colMeans((MEAN-mu)^2)
+BIAS <- colMeans(MEAN-mu)
+AVESD <- colMeans(SD)
+COVERAGE <- colMeans(LOW<mu & HIGH>mu)
+print("BIAS")
+print(BIAS)
+print("MSE")
+print(MSE)
+print("Average posterior standard deviation")
+print(AVESD)
+print("Coverage of 95% intervals")
+print(COVERAGE)
+
+
+
+
+
+

@@ -1,0 +1,83 @@
+set.seed(532543)
+
+#Simulating Data
+theta_true<-14.65
+sigma2<-1
+mu<-0
+tau2<-10000
+n<-100
+y<-rnorm(n,mean=theta_true,sd=sqrt(sigma2))
+
+mcmc_samples<-10000
+chains<-3
+theta<-matrix(0,nrow=mcmc_samples,ncol=chains)
+for(j in 1:chains){
+   theta[,j]<-rnorm(n=mcmc_samples,mean=(mean(y)*(n/sigma2)/((n/sigma2) + (1/tau2))),sd=sqrt(1/((n/sigma2) + (1/tau2))))
+   }
+
+plot(theta[,1],type="l",ylim=c(-300,300))
+for(j in 2:chains){
+   lines(theta[,j],col=j)
+   }
+
+
+library(coda)
+
+#Burn-in Amount
+burnin<-0
+plot(theta[(burnin+1):mcmc_samples,1],type="l")
+for(j in 2:chains){
+   lines(theta[(burnin+1):mcmc_samples,j],col=j)
+   }
+
+#Autocorrelation Function Plot for Each Chain
+par(mfrow=c(3,1))
+for(j in 1:chains){
+   acf(theta[(burnin+1):mcmc_samples,j])
+   }
+
+#Effective Sample Size for Each Chain
+for(j in 1:chains){
+   print(effectiveSize(theta[(burnin+1):mcmc_samples,j]))
+   }
+
+#Geweke Diagnostic
+for(j in 1:chains){
+   print(geweke.diag(theta[(burnin+1):mcmc_samples,j]))
+   } 
+
+#Gelman and Rubin Diagnostic
+burnin<-0
+total_count<-(mcmc_samples-burnin)
+keep_set1<-seq((burnin+1),burnin+(total_count/2),1)
+keep_set2<-seq(burnin+(total_count/2)+1,mcmc_samples,1)
+
+mh.list1<-
+list(as.mcmc(theta[keep_set1,1]),
+     as.mcmc(theta[keep_set2,1]),
+     as.mcmc(theta[keep_set1,2]),
+     as.mcmc(theta[keep_set2,2]),
+     as.mcmc(theta[keep_set1,3]),
+     as.mcmc(theta[keep_set2,3]))
+
+mh.list <- mcmc.list(mh.list1)
+gelman.diag(mh.list)$psrf
+     
+#Final Inference
+full_theta<-
+c(theta[(burnin+1):mcmc_samples,1],
+  theta[(burnin+1):mcmc_samples,2],
+  theta[(burnin+1):mcmc_samples,3])
+
+hist(full_theta)
+quantile(full_theta,c(0.025,0.975))
+mean(full_theta)
+median(full_theta)
+
+
+
+
+
+
+
+

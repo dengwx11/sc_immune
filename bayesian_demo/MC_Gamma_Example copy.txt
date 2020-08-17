@@ -1,0 +1,51 @@
+################################
+#Example:  \theta|Y~Gamma(68,45)
+################################
+
+#Posterior Mean
+means<-rep(0,times=10000)
+y<-rgamma(1,68,45)
+for(j in 1:10000){
+   y<-c(y,rgamma(1,68,45))
+   means[j]<-mean(y)
+   }
+plot(means,type="l")
+abline(68/45,0,col="blue",lwd=2) 
+
+#Posterior Variance
+vars<-rep(0,times=10000)
+y<-rgamma(1,68,45)
+for(j in 1:10000){
+   y<-c(y,rgamma(1,68,45))
+   vars[j]<-var(y)
+   }
+plot(vars,type="l")
+abline((68/(45^2)),0,col="blue",lwd=2) 
+
+
+#P(\theta<1.75|Y)
+probs<-rep(0,times=10000)
+y<-rgamma(1,68,45)
+for(j in 1:10000){
+   y<-c(y,rgamma(1,68,45))
+   probs[j]<-mean(y<1.75)
+   }
+plot(probs,type="l")
+abline((pgamma(1.75,68,45)),0,col="blue",lwd=2) 
+
+
+
+
+
+#0.025 Quantile
+quants<-rep(0,times=10000)
+y<-rgamma(1,68,45)
+for(j in 1:10000){
+   y<-c(y,rgamma(1,68,45))
+   quants[j]<-quantile(y,0.025)
+   }
+plot(quants,type="l")
+abline((qgamma(0.025,68,45)),0,col="blue",lwd=2) 
+
+
+
