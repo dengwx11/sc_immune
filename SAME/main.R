@@ -42,7 +42,7 @@ pi_ber_est <- matrix(0, nrow =  mcmc_samples_theta1, ncol = 1)
 tau_x_est <- matrix(0, nrow =  mcmc_samples_theta1, ncol = D)
 tau_w_est <- matrix(0, nrow =  mcmc_samples_theta1, ncol = 1)
 
-# theta_1
+# theta1
 z_est <- matrix(rnorm(K*N,mean = 2,sd = 1),nrow = K, ncol = N)
 w_est <- list()
 for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first item = t0 tissue 
