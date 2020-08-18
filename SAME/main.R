@@ -51,14 +51,14 @@ for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first
 ## SAME
 
 for(i in 1:mcmc_samples){
-    ## Step 1: Update theta_1 for Lambda[i] times
+    ## Step 1: Update theta2 for Lambda[i] times
     start_idx = sum(Lambda[1:i])
     end_idx = sum(Lambda[1:(i+1)])
     for(j in start_idx:end_idx){
-        
+
     }
 
-    ## Step 2: Update theta_2 for one time
+    ## Step 2: Update theta1 for one time
 
 }
 
