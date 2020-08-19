@@ -104,6 +104,17 @@ SAME <- function(Y0, X, W_tilde,
     }
 
     rst <- list()
+    rst$theta1 <- list()
+    rst$theta2 <- list()
+
+    rst$theta1$z <- z_est
+    rst$theta1$w <- w_est
+
+    rst$theta2$tau_e <- tau_e_est
+    rst$theta2$alpha_unif <- alpha_unif_est
+    rst$theta2$gamma <- gamma_est
+    rst$theta2$v <- v_est
+
     return(rst)
 
 }
