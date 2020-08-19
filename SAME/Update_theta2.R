@@ -8,10 +8,12 @@ update_tau_e <- function(Y0, W_tilde, # input
                             N, D # other para
                             ){
     #############
-    ## Input:
+    #### Input:
     ## Y0: bulk sample, D*N
-    ##
-    ## Output:
+    ## W_tilde: cluster-specific expression profile matrix, D*K
+    ## w_t0: short for w_hatt0, D*K
+    ## z: cluster fractions matrix, K*N
+    #### Output:
     ## tau_e_new: 1*D
     #############                                                                    
     para1 <- rep(N/2 + alpha_e,D)
@@ -29,7 +31,7 @@ update_alpha_unif <- function(Y0, W_tilde,
                                 ){
     para1 <- sum(tau_e %*% (((W_tilde - w)%*%z)^2))
     para2 <- (1/para1) * sum(tau_e %*% ((Y0 - w_t0%*%z)*(W_tilde - w_t0)%*%z))
-    alpha_unif_new <- rnorm(1, para2, para1)
+    alpha_unif_new <- rnorm(1, para2, sd = (1/sqrt(para1))
     return(alpha_unif_new)
 }
 
@@ -41,10 +43,83 @@ update_gamma <- function(W_tilde,
     gamma_new <- matrix(0, nrow = D, ncol = K)
     para <- log(pi_est/(1-pi_est)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
     for (d in 1:D){
-        for (k in 1:K)P{
+        for (k in 1:K){
             p_temp <- 1/(1+exp(-para[d,k]))
             gamma_new[d,k] = rbinom(n=1, size = 1, prob = p_temp)
         }
     }
     return(gamma_new)
+}
+
+#update v
+update_v <- function(tau_w, W_T, gamma,
+                        tau_v=tau_v,
+                        D, K, T
+                        ){
+    v_new <- matrix(0, nrow = D, ncol = K)
+    para1 <- T*tau_w + tau_v
+    para2 <- (1/para1)*tau_w*Reduce("+", W_T)
+    for (d in 1:D){
+        for (k in 1:K){
+            if (gamma[d,k] == 1){
+                v_new[d,k] <- rnorm(n=1, para2, sd = (1/sqrt(para1))
+            }
+            if (gamma[d,k] == 0){
+                v_new[d,k] <- rnorm(n=1, 0, sd = (1/sqrt(tau_v)))
+            }
+        }
+    }
+    return(v_new)
+}
+
+#update pi_est
+update_pi_est <- function(gamma, 
+                            alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi,
+                            D, K
+                            ){
+    para1 <- alpha_pi + sum(gamma)
+    para2 <- beta_pi + D*K - sum(gamma)
+    pi_new <- rbeta(n=1, para1, para2)
+    return(pi_new)
+}
+
+#update tau_x
+update_tau_x <- function(X, #X is a list of gene expression matrix from each tissue. For each matrix, cells should be ordered by cell types
+                            W_T,
+                            alpha_x = alpha_prior_x, beta_x = beta_prior_x,
+                            C0, c_k, K, T, D
+                            ){
+    tau_x_new <- matrix(0,nrow = 1, ncol = D)
+    para2_list <- list()
+    para2_temp <- matrix(0, nrow = 1, ncol = D)
+    for (t in 1:T){
+        w_t <- W_T[[t]]
+        w_temp <- matrix(0, nrow = D, ncol = sum(c_k[,t]))
+        for (k in 1:K){
+            start_index <- sum(c_k[1:(k-1),t]) + 1 
+            end_index <- sum(c_k[1:k,t)
+            w_temp[,start_idx:end_idx] <- w_t[,k]
+        }
+        x_t <- X[[t]]
+        para2_term1 <- ((x_t - w_t)^2)/2
+        para2_list[[t]] <- apply(para2_term1, 1, sum)
+        para2_temp = para2_temp + para2_list[[t]]
+    }
+    para1 <- rep(((C0/2) + alpha_x), D)
+    para2 <- para2_temp + beta_x
+    for(d in 1:D){
+        tau_x_new[,d] <- rgamma(1, para1[d],para2[d])
+    }
+    return(tau_x_new)
+}
+
+#update tau_w
+update_tau_w <- function (W_T, v, gamma
+                            alpha_w = alpha_prior_w, beta_w = beta_prior_w
+                            T, D, K
+                            ){
+    para1 <- (T*D*K/2) + alpha_w
+    para2 <- sum(Reduce("+", lapply(W_T, function(x)(x-v*gamma)^2)))/2 + beta_w
+    tau_w_new <- rgamma(1, para1, para2)
+    return(tau_w_new)
 }
