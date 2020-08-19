@@ -91,7 +91,7 @@ SAME <- function(Y0, X, W_tilde,
                             alpha_x = alpha_prior_x, beta_x = beta_prior_x,
                             C0, c_k, K, T, D
                             )
-            update_tau_w(w_est, v_est, gamma_est,
+            tau_w_est[j+1] <- update_tau_w(w_est, v_est, gamma_est,
                             alpha_w = alpha_prior_w, beta_w = beta_prior_w,
                             T, D, K
                             )                
@@ -114,6 +114,9 @@ SAME <- function(Y0, X, W_tilde,
     rst$theta2$alpha_unif <- alpha_unif_est
     rst$theta2$gamma <- gamma_est
     rst$theta2$v <- v_est
+    rst$theta2$pi <- pi_ber_est
+    rst$theta2$tau_x <- tau_x_est
+    rst$theta2$tau_w <- tau_w_est
 
     return(rst)
 
