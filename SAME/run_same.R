@@ -65,6 +65,7 @@ SAME <- function(Y0, X, W_tilde,
         ## Step 1: Update theta2 for Lambda[i] times
         start_idx = sum(Lambda[1:i])
         end_idx = sum(Lambda[1:(i+1)])
+        k=1
         for(j in start_idx:end_idx){
             tau_e_est[j+1] <- update_tau_e(Y0, W_tilde, # input
                             alpha[j], w_t0[[1]], z_est, # est
@@ -74,15 +75,15 @@ SAME <- function(Y0, X, W_tilde,
             alpha_unif_est[j+1] <- update_alpha_unif(Y0, W_tilde,
                                 w_t0[[1]], z_est, tau_e_est[j+1]
                                 )
-            gamma_est <- update_gamma(W_tilde, 
-                            w_est, pi_ber_est[j], v_est
+            gamma_est[[k]] <- update_gamma(W_tilde, 
+                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]]
                             D, K
                             )
-            v_est<-update_v(tau_w, w_est, gamma_est,
+            v_est[[k]]<-update_v(tau_w, w_est, gamma_est[[k]],
                         tau_v=tau_v,
                         D, K, T
                         )
-            pi_ber_est[j+1] <- update_pi_est(gamma_est, 
+            pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
                             alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi,
                             D, K
                             )
@@ -91,11 +92,11 @@ SAME <- function(Y0, X, W_tilde,
                             alpha_x = alpha_prior_x, beta_x = beta_prior_x,
                             C0, c_k, K, T, D
                             )
-            update_tau_w(w_est, v_est, gamma_est,
+            tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
                             alpha_w = alpha_prior_w, beta_w = beta_prior_w,
                             T, D, K
                             )                
-
+            k=k+1
         }
 
         ## Step 2: Update theta1 for one time
@@ -104,6 +105,20 @@ SAME <- function(Y0, X, W_tilde,
     }
 
     rst <- list()
+    rst$theta1 <- list()
+    rst$theta2 <- list()
+
+    rst$theta1$z <- z_est
+    rst$theta1$w <- w_est
+
+    rst$theta2$tau_e <- tau_e_est
+    rst$theta2$alpha_unif <- alpha_unif_est
+    rst$theta2$gamma <- gamma_est
+    rst$theta2$v <- v_est
+    rst$theta2$pi <- pi_ber_est
+    rst$theta2$tau_x <- tau_x_est
+    rst$theta2$tau_w <- tau_w_est
+
     return(rst)
 
 }

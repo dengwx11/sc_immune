@@ -11,4 +11,5 @@ source('run_same.R')
 mcmc_samples_theta1 = 100
 Lambda = c(0:mcmc_samples_theta1)
 
-
+rst <- SAME(Y0, X, W_tilde,
+                 mcmc_samples_theta1, Lambda)
