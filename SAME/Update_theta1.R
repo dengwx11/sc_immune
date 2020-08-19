@@ -3,9 +3,9 @@ set.seed(2020)
 # input for Update_theta1.R is theta=list(theta1, theta2)
 # theta2=(tau_e, alpha, gamma_kn, v_dk, pi, tau_x, tau_w, tau_v)
 # theta1=(z, w) # w_t0 = w[[t0]]; t0 = 1
-# w_t is short for w_hatt
+# w_t is short for w_hat
 
-update_z_est <- function(theta){
+update_z <- function(theta){
   theta1 <- theta$theta1
   theta2 <- theta$theta2
   tau_e = theta2$tau_e ## d by Gammai matrix
@@ -35,7 +35,7 @@ update_z_est <- function(theta){
   return(list(theta1=theta1_new, theta2=theta2))
 }
 
-update_w_est <- function(theta){
+update_w <- function(theta){
   theta1 <- theta$theta1
   theta2 <- theta$theta2
   tau_e = theta2$tau_e

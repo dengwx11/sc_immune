@@ -4,7 +4,7 @@ set.seed(2020)
 #update tau_e
 update_tau_e <- function(Y0, W_tilde, # input
                             alpha, w_t0, z, # est
-                            alpha_e = alpha_prior_e, beta_e = beta_prior_e, # noninformative prior
+                            alpha_e = 10^(-6), beta_e = 10^(-6), # noninformative prior
                             N, D # other para
                             ){
     #############
@@ -72,7 +72,7 @@ update_gamma <- function(W_tilde,
 
 #update v
 update_v <- function(tau_w, W_T, gamma,
-                        tau_v=tau_v,
+                        tau_v=0.01,
                         D, K, T
                         ){
     #############
@@ -102,7 +102,7 @@ update_v <- function(tau_w, W_T, gamma,
 
 #update pi_est
 update_pi_est <- function(gamma, 
-                            alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi,
+                            alpha_pi = 10^(-6), beta_pi = 10^(-6),
                             D, K
                             ){                                                                
     para1 <- alpha_pi + sum(gamma)
@@ -114,7 +114,7 @@ update_pi_est <- function(gamma,
 #update tau_x
 update_tau_x <- function(X, #X is a list of gene expression matrix from each tissue. For each matrix, cells should be ordered by cell types
                             W_T,
-                            alpha_x = alpha_prior_x, beta_x = beta_prior_x,
+                            alpha_x = 10^(-6), beta_x = 10^(-6),
                             C0, c_k, K, T, D
                             ){
     #############
@@ -151,7 +151,7 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
 
 #update tau_w
 update_tau_w <- function (W_T, v, gamma,
-                            alpha_w = alpha_prior_w, beta_w = beta_prior_w,
+                            alpha_w = 10^(-6), beta_w = 10^(-6),
                             T, D, K
                             ){
     #############
