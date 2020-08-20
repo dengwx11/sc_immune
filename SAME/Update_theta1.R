@@ -34,16 +34,16 @@ update_w <- function(tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v, z, w, t0=1
       for(k in 1:K){
         tau_wtk <- tau_wt[,k] ## vector of length D
         for(d in 1:D){
-          res_d <- sapply(1:Gammai, function(j) sum(Y0[d,] - (alpha[1,j] * W_tilde[d,] + (1-alpha[1,j]) * wt_new[d,]) %*% z) ## vector of length Gammai
+          res_d <- sapply(1:Gammai, function(j) sum(Y0[d,] - (alpha[1,j] * W_tilde[d,] + (1-alpha[1,j]) * wt_new[d,]) %*% z))## vector of length Gammai
           mu_wt_dk <- sum(sapply(1:Gammai, function(j){
-            tau_e[d,j] * (1 - alpha[1,j]) * sum(z[k,] * (res_d[j] + (1 - alpha[1,j]) * z[k,])) +
-            tau_x[d,j] * sum(Xt[d, Cl == k]) + gamma[[j]][d,k] * v[[j]][d,k] * tau_w[1,j]))/tau_wtk[d]
-          }
+            (tau_e[d,j] * (1 - alpha[1,j]) * sum(z[k,] * (res_d[j] + (1 - alpha[1,j]) * z[k,])) +
+            tau_x[d,j] * sum(Xt[d, Cl == k]) + gamma[[j]][d,k] * v[[j]][d,k] * tau_w[1,j])/tau_wtk[d]
+          }))
           wt_new[d,k] <- rnorm(mu_wt_dk, tau_wtk[d], 1)
         }
       }
     } else{
-      tau_wt <- rowSums( C[k] * tau_x + t(matrix(rep(tau_w, nrow(tau_x)), nrow=Gammai))  ## d by 1
+      tau_wt <- rowSums( C[k] * tau_x + t(matrix(rep(tau_w, nrow(tau_x)), nrow=Gammai)))  ## d by 1
       for(k in 1:K){
         mu_wtk <- rowSums(sapply(1:Gammai, function(j) tau_x[,j] * rowSums(Xt[, Cl == k]) + gamma[[j]][,k] * v[[j]][,k] * tau_w[1,j]))/tau_wt
         wt_new[,k] <- sapply(1:D, function(d) rnorm(mu_wtk[d], tau_wt[d], 1))
