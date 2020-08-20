@@ -76,7 +76,7 @@ SAME <- function(Y0, X, W_tilde,
                                 w_t0[[1]], z_est, tau_e_est[j+1]
                                 )
             gamma_est[[k]] <- update_gamma(W_tilde, 
-                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]]
+                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]],
                             D, K
                             )
             v_est[[k]]<-update_v(tau_w, w_est, gamma_est[[k]],

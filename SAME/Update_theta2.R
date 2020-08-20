@@ -47,7 +47,7 @@ update_alpha_unif <- function(Y0, W_tilde,
 
 #update gamma
 update_gamma <- function(W_tilde, 
-                            W_T, pi_pre, v
+                            W_T, pi_pre, v,
                             D, K
                             ){
     #############
@@ -133,7 +133,7 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
         w_temp <- matrix(0, nrow = D, ncol = sum(c_k[,t]))
         for (k in 1:K){
             start_index <- sum(c_k[1:(k-1),t]) + 1 
-            end_index <- sum(c_k[1:k,t)
+            end_index <- sum(c_k[1:k,t])
             w_temp[,start_idx:end_idx] <- w_t[,k]
         }
         x_t <- X[[t]]
@@ -167,3 +167,52 @@ update_tau_w <- function (W_T, v, gamma,
     tau_w_new <- rgamma(1, para1, para2)
     return(tau_w_new)
 }
+library(Seurat)
+#preprocess scRNA-seq data to get X
+data_preprocessing <- function(data_set_list, # a list of scRNA-seq dataset, and the first item is t0 tissue. All the items are Seurat object.
+                                CL = "Celltype_used", #for HCL data
+                                SG, # a list of signature genes
+                                celltype.list = c("B", "Dendritic cell", "Macrophage", "Monocyte", "Neutrophil", "NK cell", "Plasmocyte", "T")
+
+){
+    X_SAME <- list()
+    T = length(data_set_list)
+    K = length(celltype.list)
+    c_k = matrix(0, nrow = K, ncol = T)
+    D = length(SG)
+    for (t in 1:T){
+        seur = data_set_list[[t]]
+        mat = matrix(0, nrow = D)
+        for (k in 1:K){
+            seur.list <- SplitObject(seur, split.by = CL)
+            if (is.null(seur.list[[celltype.list[k]]])){
+                c_k[k,t] = 0
+            } else {
+                c_k[k,t] = ncol(seur.list[[celltype.list[k]]])
+                seur_k <- seur.list[[celltype.list[k]]]
+                mat <- cbind(mat, seur_k@assays$RNA@counts[SG,])
+            }
+        }
+        X_SAME[[t]] = mat
+    }
+    W_tilde <- matrix(0, nrow = D, ncol = K)
+    seur_t0 <- data_set_list[[1]]
+    for (k in 1:K){
+        seur_t0.list <- SplitObject(seur_t0, split.by = CL)
+        if (is.null(seur.list[[celltype.list[k]]])){
+            W_tilde[,k] = 0
+        } else {
+            seur_t0_k <- seur_t0.list[[celltype.list[k]]]
+            W_tilde[,k] = apply(seur_k@assays$RNA@counts[SG,], 1, mean)
+        }
+    }
+    rst <- list()
+    rst$X <- X_SAME
+    rst$T <- T
+    rst$K <- K
+    rst$D <- D
+    rst$c_k <- c_k
+    rst$W_tilde <- W_tilde
+    return(rst)
+}
+
