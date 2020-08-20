@@ -41,7 +41,7 @@ update_alpha_unif <- function(Y0, W_tilde,
     ############# 
     para1 <- sum(tau_e %*% (((W_tilde - w_t0)%*%z)^2))
     para2 <- (1/para1) * sum(tau_e %*% ((Y0 - w_t0%*%z)*(W_tilde - w_t0)%*%z))
-    alpha_unif_new <- rnorm(1, para2, sd = (1/sqrt(para1))
+    alpha_unif_new <- rnorm(1, para2, sd = (1/sqrt(para1)))
     return(alpha_unif_new)
 }
 
@@ -90,7 +90,7 @@ update_v <- function(tau_w, W_T, gamma,
     for (d in 1:D){
         for (k in 1:K){
             if (gamma[d,k] == 1){
-                v_new[d,k] <- rnorm(n=1, para2, sd = (1/sqrt(para1))
+                v_new[d,k] <- rnorm(n=1, para2, sd = (1/sqrt(para1)))
             }
             if (gamma[d,k] == 0){
                 v_new[d,k] <- rnorm(n=1, 0, sd = (1/sqrt(tau_v)))
