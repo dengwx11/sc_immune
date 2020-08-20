@@ -68,12 +68,12 @@ SAME <- function(Y0, X, W_tilde,
         k=1
         for(j in start_idx:end_idx){
             tau_e_est[j+1] <- update_tau_e(Y0, W_tilde, # input
-                            alpha[j], w_t0[[1]], z_est, # est
+                            alpha[j], w_est[[1]], z_est, # est
                             alpha_e = alpha_prior_e, beta_e = beta_prior_e, # noninformative prior
                             N, D # other para
                             )
             alpha_unif_est[j+1] <- update_alpha_unif(Y0, W_tilde,
-                                w_t0[[1]], z_est, tau_e_est[j+1]
+                                w_est[[1]], z_est, tau_e_est[j+1]
                                 )
             gamma_est[[k]] <- update_gamma(W_tilde, 
                             w_est, pi_ber_est[j], v_est[[Lambda[i+1]]],
