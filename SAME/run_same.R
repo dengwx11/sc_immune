@@ -3,7 +3,7 @@ source("Update_theta1.R")
 source("Update_theta2.R")
 
 SAME <- function(Y0, X, W_tilde,
-                 mcmc_samples_theta1, Lambda)
+                 mcmc_samples_theta1, Lambda, c_k)
 {
 
 
@@ -25,7 +25,7 @@ SAME <- function(Y0, X, W_tilde,
     K = ncol(W_tilde) # number of cell types
     T = length(X)  # number of tissues
     N = ncol(Y0) # number of bulk samples
-    c_k = matrix(200,nrow = K, ncol = T) # sequence of cell counts for each cell type and each tissue
+    #c_k = matrix(200,nrow = K, ncol = T) # sequence of cell counts for each cell type and each tissue
     C0 = sum(c_k) # total number of single cell counts
 
 
@@ -68,7 +68,7 @@ SAME <- function(Y0, X, W_tilde,
         k=1
         for(j in start_idx:end_idx){
             tau_e_est[j+1] <- update_tau_e(Y0, W_tilde, # input
-                            alpha[j], w_est[[1]], z_est, # est
+                            alpha_unif_est[j], w_est[[1]], z_est, # est
                             alpha_e = alpha_prior_e, beta_e = beta_prior_e, # noninformative prior
                             N, D # other para
                             )
