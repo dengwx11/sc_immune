@@ -8,6 +8,10 @@ set.seed(2020)
 update_z <- function(Y0, X0, W_tilde,
                       tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v, z, w, t0=1,
                       t0, N, D, K, c_k, Cl){
+ ####
+ ## vector -> matrix ( D * Lambdai )
+ ## matrix -> list (length = Lambdai )
+ ####                        
   Lambdai = ncol(tau_e)
   t0 = 1
   w_t0 = w[[t0]]

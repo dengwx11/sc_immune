@@ -138,7 +138,7 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
             w_temp[,start_idx:end_idx] <- w_t[,k]
         }
         x_t <- as.matrix(X[[t]])
-        para2_term1 <- ((x_t - w_t)^2)/2
+        para2_term1 <- ((x_t - w_temp)^2)/2
         para2_list[[t]] <- apply(para2_term1, 1, sum)
         para2_temp = para2_temp + para2_list[[t]]
     }
