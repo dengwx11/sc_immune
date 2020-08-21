@@ -2,11 +2,31 @@ set.seed(2020)
 source("Update_theta1.R")
 source("Update_theta2.R")
 
+get_Cl <- function(X){
+    Cl <- Reduce(c, lapply(X, function(X) as.vector(X$Celltype_used)) )
+    Cl <- factor(Cl)
+    celltype_list <- levels(Cl)
+    Cl <- as.numeric(Cl)
+    Cl <- list(Cl = Cl, levels = celltype_list)
+    return(Cl)
+}
+
+get_X_mat <- function(X, SG){
+    X_mat <- list()
+    for(i in 1:length(X)) X_mat[[i]] <- X[[i]]@assays$RNA@counts[YSG,]
+    return(X_mat)
+}
+
+
 SAME <- function(Y0, X, W_tilde,
-                 mcmc_samples_theta1, Lambda, c_k)
+                 mcmc_samples_theta1, Lambda, c_k, YSG)
 {
 
+    Cl <- get_Cl(X)
+    celltype_list <- Cl$levels
+    Cl = Cl$Cl
 
+    X <- get_X_mat(X, YSG)
     ## Initialization (lower case)
     # Noninformative Prior Parameters
 
@@ -34,7 +54,7 @@ SAME <- function(Y0, X, W_tilde,
     # matrix is stored as the newest one 
     # theta2
     mcmc_samples_theta2 = sum(Lambda)
-    tau_e_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = D)
+    tau_e_est <- matrix(0.01, nrow =  mcmc_samples_theta2, ncol = D)
     tau_e_est[1] <- 1
     alpha_unif_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = 1)
     alpha_unif_est[1] <- 0.5
@@ -63,20 +83,20 @@ SAME <- function(Y0, X, W_tilde,
 
     for(i in 1:mcmc_samples_theta1){
         ## Step 1: Update theta2 for Lambda[i] times
-        start_idx = sum(Lambda[1:i])
+        start_idx = sum(Lambda[1:i])+1
         end_idx = sum(Lambda[1:(i+1)])
         k=1
         for(j in start_idx:end_idx){
-            tau_e_est[j+1] <- update_tau_e(Y0, W_tilde, # input
+            tau_e_est[j+1,] <- update_tau_e(Y0, W_tilde, # input
                             alpha_unif_est[j], w_est[[1]], z_est, # est
                             alpha_e = alpha_prior_e, beta_e = beta_prior_e, # noninformative prior
                             N, D # other para
                             )
-            alpha_unif_est[j+1] <- update_alpha_unif(Y0, W_tilde,
+            alpha_unif_est[j+1,] <- update_alpha_unif(Y0, W_tilde,
                                 w_est[[1]], z_est, tau_e_est[j+1]
                                 )
             gamma_est[[k]] <- update_gamma(W_tilde, 
-                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]],
+                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]], tau_w_est[j],
                             D, K
                             )
             v_est[[k]]<-update_v(tau_w, w_est, gamma_est[[k]],
@@ -100,8 +120,12 @@ SAME <- function(Y0, X, W_tilde,
         }
 
         ## Step 2: Update theta1 for one time
-        z_est <- update_z(theta)
-        w_est <- update_w(theta)
+        z_est <- update_z(Y0, X0, W_tilde,
+                      tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v, z, w, t0=1,
+                      t0, N, D, K, c_k, Cl)
+        w_est <- update_w(Y0, X0, W_tilde,,
+                      tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v, z, w, t0=1,
+                      t0, N, D, K, c_k, Cl)
     }
 
     rst <- list()
