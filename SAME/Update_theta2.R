@@ -4,8 +4,7 @@ set.seed(2020)
 #update tau_e
 update_tau_e <- function(Y0, W_tilde, # input
                             alpha, w_t0, z, # est
-                            alpha_e = 10^(-6), beta_e = 10^(-6), # noninformative prior
-                            N, D # other para
+                            alpha_e = 10^(-6), beta_e = 10^(-6) # noninformative prior
                             ){
     #############
     #### Input:
@@ -39,17 +38,17 @@ update_alpha_unif <- function(Y0, W_tilde,
     #### Output:
     ## alpha_unif_new: one value falls into interval of (0, 1)
     ############# 
-    para1 <- sum(tau_e %*% (((W_tilde - w_t0)%*%z)^2))
+    para1 <- sum(tau_e * (((W_tilde - w_t0)%*%z)^2))
     A <- ( (Y0 - w_t0%*%z) * ((W_tilde - w_t0)%*%z) )
-    para2 <- (1/para1) * sum(tau_e %*% A )
+    para2 <- (1/para1) * sum(tau_e * A )
     alpha_unif_new <- rnorm(1, para2, sd = (1/sqrt(para1)))
+    alpha_unif_new <- max(min(1, alpha_unif_new),0)
     return(alpha_unif_new)
 }
 
 #update gamma
 update_gamma <- function(W_tilde, 
-                            W_T, pi_pre, v, tau_w,
-                            D, K
+                            W_T, pi_pre, v, tau_w
                             ){
     #############
     #### Input:
@@ -73,8 +72,7 @@ update_gamma <- function(W_tilde,
 
 #update v
 update_v <- function(tau_w, W_T, gamma,
-                        tau_v=0.01,
-                        D, K, T
+                        tau_v=0.01
                         ){
     #############
     #### Input:
@@ -103,8 +101,7 @@ update_v <- function(tau_w, W_T, gamma,
 
 #update pi_est
 update_pi_est <- function(gamma, 
-                            alpha_pi = 10^(-6), beta_pi = 10^(-6),
-                            D, K
+                            alpha_pi = 10^(-6), beta_pi = 10^(-6)
                             ){                                                                
     para1 <- alpha_pi + sum(gamma)
     para2 <- beta_pi + D*K - sum(gamma)
@@ -115,8 +112,7 @@ update_pi_est <- function(gamma,
 #update tau_x
 update_tau_x <- function(X, #X is a list of gene expression matrix from each tissue. For each matrix, cells should be ordered by cell types
                             W_T,
-                            alpha_x = 10^(-6), beta_x = 10^(-6),
-                            C0, c_k, K, T, D
+                            alpha_x = 10^(-6), beta_x = 10^(-6)
                             ){
     #############
     #### Input:
@@ -129,13 +125,15 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
     tau_x_new <- matrix(0,nrow = 1, ncol = D)
     para2_list <- list()
     para2_temp <- matrix(0, nrow = 1, ncol = D)
+    end_idx = 0
     for (t in 1:T){
         w_t <- W_T[[t]]
         w_temp <- matrix(0, nrow = D, ncol = sum(c_k[,t]))
-        for (k in 1:K){
-            start_index <- sum(c_k[1:(k-1),t]) + 1 
-            end_index <- sum(c_k[1:k,t])
-            w_temp[,start_idx:end_idx] <- w_t[,k]
+        start_idx <- end_idx + 1
+        end_idx <- start_idx + sum(c_k[,t])-1
+        for (k in 1:K){                         
+            idx = which(Cl[start_idx:end_idx] == k)
+            w_temp[,idx] = w_t[,k]
         }
         x_t <- as.matrix(X[[t]])
         para2_term1 <- ((x_t - w_temp)^2)/2
@@ -152,8 +150,7 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
 
 #update tau_w
 update_tau_w <- function (W_T, v, gamma,
-                            alpha_w = 10^(-6), beta_w = 10^(-6),
-                            T, D, K
+                            alpha_w = 10^(-6), beta_w = 10^(-6)
                             ){
     #############
     #### Input:

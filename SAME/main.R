@@ -13,6 +13,7 @@ T = same_input$T
 K = same_input$K
 D = same_input$D
 c_k = same_input$c_k
+C0 = sum(c_k)
 W_tilde = same_input$W_tilde
 YSG =  same_input$YSG
 
