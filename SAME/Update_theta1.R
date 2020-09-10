@@ -5,7 +5,7 @@ set.seed(2020)
 ## theta2=(tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v); each variable is a x by Gamma_i matrix
 ## Global params: Y0, X0, W_tilde; t0, N, D, K, C(k)=counts of celltype k, Cl=celltype lables
 
-update_z <- function(Y0, X0, W_tilde,
+update_z0 <- function(Y0, X0, W_tilde,
                       tau_e, alpha, z, w, t0=1){
  ####
  ## vector -> matrix ( D * Lambdai )
@@ -17,26 +17,23 @@ update_z <- function(Y0, X0, W_tilde,
   ## here below z is updated by row
   z_new <- z
   w_pseudo <- lapply(1:Lambdai, function(j) alpha[1,j] * W_tilde + (1-alpha[1,j]) * w_t0) ## length of Lambdai list
-  if(Lambdai == 1){
-    tau_z <- sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]]^2) + 1 )
-  }else{
-    tau_z <- rowSums(sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]]^2) + 1 ) )
-  }
+
+  tau_z <- sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]]^2) + 1 )
+  tau_z <- matrix(tau_z, nrow = Lambdai, ncol = K)
+  tau_z <- apply(tau_z, 1, sum)
   
   for(k in 1:K){
     tau_zk <- 1/tau_z[k]
     res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new + matrix(w_p[,k],ncol=1) %*% matrix(z_new[k,],nrow = 1))
-    if(Lambdai == 1){
       mu_zk <- sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]][,k] * res[[j]]))/tau_zk
-    }else{
-      mu_zk <- rowSums(sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]][,k] * res[[j]])))/tau_zk    
-    }
+    mu_zk <- matrix(mu_zk, nrow = Lambdai, ncol = N)
+    mu_zk <- apply(mu_zk, 1, sum)
     z_new[k,] <- sapply(mu_zk, function(mu_zkn) rnorm(mu_zkn, 1/tau_zk, 1))
   }
   return(z_new)
 }
 
-update_w <- function(Y0, X0, W_tilde,
+update_w0 <- function(Y0, X0, W_tilde,
                       tau_e, alpha, gamma, v, tau_x, tau_w, z, w, t0=1
                       ){
   Lambdai = ncol(tau_e)
@@ -49,13 +46,11 @@ update_w <- function(Y0, X0, W_tilde,
     start_idx <- end_idx + 1
     end_idx <- start_idx + sum(c_k[,t])-1
     if(t == t0){
-      if(Lambdai == 1){
+
               tau_wt <- sapply(1:K, function(k) sapply(1:Lambdai,
         function(j) (1 - alpha[1,j])^2 * tau_e[,j] * z[k,]^2 + C[k] * tau_x[,j] + tau_w[1,j]))  ## D by K matrix
-      }else{
-              tau_wt <- sapply(1:K, function(k) rowSums(sapply(1:Lambdai,
-        function(j) (1 - alpha[1,j])^2 * tau_e[,j] * rowSums(z[k,]^2) + C[k] * tau_x[,j] + tau_w[1,j])))  ## D by K matrix
-      }
+        tau_wt <- matrix(tau_wt, nrow = Lambdai, ncol = K)
+        tau_wt <- apply(tau_wt, 1, sum)
 
       for(k in 1:K){
         tau_wtk <- tau_wt[,k] ## vector of length D
@@ -78,3 +73,5 @@ update_w <- function(Y0, X0, W_tilde,
   }
   return(wt_new)
 }
+
+
