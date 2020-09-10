@@ -5,7 +5,7 @@ set.seed(2020)
 ## theta2=(tau_e, alpha, gamma, v, pi, tau_x, tau_w, tau_v); each variable is a x by Gamma_i matrix
 ## Global params: Y0, X0, W_tilde; t0, N, D, K, C(k)=counts of celltype k, Cl=celltype lables
 
-update_z0 <- function(Y0, X0, W_tilde,
+update_z <- function(Y0, X0, W_tilde,
                       tau_e, alpha, z, w, t0=1){
  ####
  ## vector -> matrix ( D * Lambdai )
@@ -33,7 +33,7 @@ update_z0 <- function(Y0, X0, W_tilde,
   return(z_new)
 }
 
-update_w0 <- function(Y0, X0, W_tilde,
+update_w <- function(Y0, X0, W_tilde,
                       tau_e, alpha, gamma, v, tau_x, tau_w, z, w, t0=1
                       ){
   Lambdai = ncol(tau_e)
