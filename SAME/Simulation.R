@@ -57,7 +57,7 @@ max_cos <- function(w){
 }
 
 #simulate w
-simulate_sigmat_w <- function(iteration, D, K, pi_ber){
+simulate_sigmat_w <- function(iteration, D, K, pi_ber, T){
     w.list <- list()
     v.list <- list()
     gamma.list <- list()
@@ -74,10 +74,17 @@ simulate_sigmat_w <- function(iteration, D, K, pi_ber){
     }
     minindex <- which.min(cos.list)
     print(cos.list[[minindex]])
-    output$w <- w.list[[minindex]]
+    # output$w <- w.list[[minindex]]
     output$v <- v.list[[minindex]]
     output$gamma <- gamma.list[[minindex]]
     output$max_cos <- cos.list[[minindex]]
+
+    w.TissueList <- list()
+    w.TissueList[[1]] <- w.list[[minindex]]
+    if(T>1){
+        for(i in 2:T) w.TissueList[[i]] <- generate_w(output$v, output$gamma, D, K)
+    }
+    output$w <- w.TissueList
     return(output)
 }
 
@@ -99,35 +106,42 @@ generate_z <- function(K,N){
 #if wdkt>0, xdkc > 0
 #if wdkt=0, mu=0, tau_xd=5, if x <0 , x =0.001
 #generate X, a list contain read count matrix, cell labels, tau_xd, c_k, w_tilde, and celltype list
-simulate_X <- function(D, K, w_output){
-    celltype.list <- c()
-    w <- as.matrix(w_output$w)
-    c_k <- sample(0:200, size = K) #set the size for each cell type
+simulate_X <- function(D, K, w_output, T){
+
     X <- list()
-    X$counts <- matrix(0, nrow = D, ncol = sum(c_k))
-    X$Celltype_used <- rep("unknown", sum(c_k))
-    X$tau_xd <- rgamma(D, 1, 1) #sample random tau_xd from gamma distribution
-    X$c_k <- c_k
-    X$w_tilde <- matrix(0, nrow = D, ncol = K)
-    end_idx = 0
-    for (k in 1:K){
-        celltype.list[k] <- paste("celltype",k)
-        start_idx = end_idx + 1
-        end_idx = start_idx + c_k[k] - 1
-        for (d in 1:D){
-            for (i in start_idx:end_idx){ ### please check here, if wdkt>0, xdkc < 0, should x_dkc = 0.001? or abs(rnorm()), or 0.
-                if (w[d,k]==0){
-                    X$counts[d,i] = rnorm(1, w[d,k], sd = (1/sqrt(X$tau_xd[d])))
-                    if (X$counts[d,i]<0){X$counts[d,i] = 0.001}
-                }else{
-                    X$counts[d,i] = abs(rnorm(1, w[d,k], sd = (1/sqrt(X$tau_xd[d])))) ### there is rarely 0 in X
+    for(t in 1:T){
+        X[[t]] <- list()
+        celltype.list <- c()
+        w <- as.matrix(w_output$w[[t]])
+        c_k <- sample(100:200, size = K) #set the size for each cell type
+        
+        X[[t]]$counts <- matrix(0, nrow = D, ncol = sum(c_k))
+        X[[t]]$Celltype_used <- rep("unknown", sum(c_k))
+        X[[t]]$tau_xd <- rgamma(D, 1, 1) #sample random tau_xd from gamma distribution
+        X[[t]]$c_k <- c_k
+        X[[t]]$w_tilde <- matrix(0, nrow = D, ncol = K)
+        end_idx = 0
+        for (k in 1:K){
+            celltype.list[k] <- paste("celltype",k)
+            start_idx = end_idx + 1
+            end_idx = start_idx + c_k[k] - 1
+            for (d in 1:D){
+                for (i in start_idx:end_idx){ ### please check here, if wdkt>0, xdkc < 0, should x_dkc = 0.001? or abs(rnorm()), or 0.
+                    if (w[d,k]==0){
+                        X[[t]]$counts[d,i] = rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))
+                        if (X[[t]]$counts[d,i]<0){X[[t]]$counts[d,i] = 0.001}
+                    }else{
+                        X[[t]]$counts[d,i] = abs(rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))) ### there is rarely 0 in X
+                    }
                 }
+                X[[t]]$w_tilde[d,k] = mean(X[[t]]$counts[d,start_idx:end_idx])
             }
-            X$w_tilde[d,k] = mean(X$counts[d,start_idx:end_idx])
+            X[[t]]$Celltype_used[start_idx:end_idx] <- celltype.list[k]
         }
-        X$Celltype_used[start_idx:end_idx] <- celltype.list[k]
+        X[[t]]$Celltype_list <- celltype.list
     }
-    X$Celltype_list <- celltype.list
+    
+
     return(X)
 }
 
@@ -148,7 +162,7 @@ simulate_X <- function(D, K, w_output){
 #simulate Y
 simulate_y <- function(w_sim_output, X_sim_output, Z, D, N,
                         alpha = 0.5, mu_e = 0, tau_e = 100){
-    W = (1 - alpha)*(w_sim_output$w) + alpha*(X_sim_output$w_tilde)
+    W = (1 - alpha)*(w_sim_output$w[[1]]) + alpha*(X_sim_output$w_tilde)
     e <- matrix(rnorm(D*N, mu_e, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
     e[e < 0] = 0.001
     Y = W %*% Z + e
