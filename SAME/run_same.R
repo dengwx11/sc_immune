@@ -1,6 +1,6 @@
 set.seed(2020)
-source("Update_theta1.R")
-source("Update_theta2.R")
+source("SAME/Update_theta1.R")
+source("SAME/Update_theta2.R")
 
 get_Cl <- function(X){
     Cl <- Reduce(c, lapply(X, function(X) as.vector(X$Celltype_used)) )
