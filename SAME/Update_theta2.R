@@ -38,9 +38,10 @@ update_alpha_unif <- function(Y0, W_tilde,
     #### Output:
     ## alpha_unif_new: one value falls into interval of (0, 1)
     ############# 
-    para1 <- sum(tau_e * (((W_tilde - w_t0)%*%z)^2))
+    tau_e = matrix(tau_e, nrow = 1)
+    para1 <- sum(tau_e %*% ((W_tilde - w_t0)%*%z )^2)
     A <- ( (Y0 - w_t0%*%z) * ((W_tilde - w_t0)%*%z) )
-    para2 <- (1/para1) * sum(tau_e * A )
+    para2 <- (1/para1) * sum(tau_e %*% A )
     alpha_unif_new <- rnorm(1, para2, sd = (1/sqrt(para1)))
     alpha_unif_new <- max(min(1, alpha_unif_new),0)
     return(alpha_unif_new)
@@ -86,10 +87,12 @@ update_v <- function(tau_w, W_T, gamma,
     v_new <- matrix(0, nrow = D, ncol = K)
     para1 <- T*tau_w + tau_v
     para2 <- (1/para1)*tau_w*Reduce("+", W_T)
+    #print(c(para1,para2))
+    #print(str(para2))
     for (d in 1:D){
         for (k in 1:K){
             if (gamma[d,k] == 1){
-                v_new[d,k] <- rnorm(n=1, para2, sd = (1/sqrt(para1)))
+                v_new[d,k] <- rnorm(n=1, para2[d,k], sd = (1/sqrt(para1)))
             }
             if (gamma[d,k] == 0){
                 v_new[d,k] <- rnorm(n=1, 0, sd = (1/sqrt(tau_v)))

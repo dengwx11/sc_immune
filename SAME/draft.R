@@ -4,16 +4,10 @@ saveRDS(same_input,'data/Pseudo_Bulk/SAME_Input.rds')
 
 
 
-tau_e <- tau_e_same
-alpha <- alpha_same
-z <- z_est
-w <- w_est
-gamma <-gamma_same
-v <- v_same
-tau_x <- tau_x_same
-tau_w <- tau_w_same
+W_tilde <- W_tilde
+W_T <- w_est
+pi_pre <- pi_ber_est[j]
+v <- v_est[[ last_v ]]
+tau_w <- tau_w_est[j]
 
-z_est <- update_z(Y0, X0, W_tilde,
-                      tau_e, alpha, z, w, t0=1)
-
-w_p <-w_pseudo[[1]]
+update_gamma(W_tilde, W_T, pi_pre, v, tau_w)

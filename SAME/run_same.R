@@ -1,21 +1,8 @@
 set.seed(2020)
 source("SAME/Update_theta1.R")
 source("SAME/Update_theta2.R")
+source("SAME/clean_format.R")
 
-get_Cl <- function(X){
-    Cl <- Reduce(c, lapply(X, function(X) as.vector(X$Celltype_used)) )
-    Cl <- factor(Cl)
-    celltype_list <- levels(Cl)
-    Cl <- as.numeric(Cl)
-    Cl <- list(Cl = Cl, levels = celltype_list)
-    return(Cl)
-}
-
-get_X_mat <- function(X, SG){
-    X_mat <- list()
-    for(i in 1:length(X)) X_mat[[i]] <- X[[i]]@assays$RNA@counts[YSG,]
-    return(X_mat)
-}
 
 
 SAME <- function(Y0, X, W_tilde,
@@ -47,9 +34,9 @@ SAME <- function(Y0, X, W_tilde,
     # matrix is stored as the newest one 
     # theta2
     mcmc_samples_theta2 = sum(Lambda)
-    tau_e_est <- matrix(0.01, nrow =  mcmc_samples_theta2, ncol = D)
+    tau_e_est <- matrix(0.01, nrow =  mcmc_samples_theta2+1, ncol = D)
     tau_e_est[1] <- 1
-    alpha_unif_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = 1)
+    alpha_unif_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
     alpha_unif_est[1] <- 0.5
     gamma_est <- list()
     for(i in 1:Lambda[length(Lambda)]){
@@ -57,13 +44,13 @@ SAME <- function(Y0, X, W_tilde,
     }
     v_est <- list()
     for(i in 1:Lambda[length(Lambda)]){
-        v_est[[i]] <- matrix(rnorm(D*K,mean = 2,sd = 1),nrow = D, ncol = K)
+        v_est[[i]] <- abs(matrix(rnorm(D*K,mean = 2,sd = 1),nrow = D, ncol = K))
     }
-    pi_ber_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = 1)
+    pi_ber_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
     pi_ber_est[1] <- 0.5
-    tau_x_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = D)
+    tau_x_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = D)
     tau_x_est[1,] <- 1
-    tau_w_est <- matrix(0, nrow =  mcmc_samples_theta2, ncol = 1)
+    tau_w_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
     tau_w_est[1] <- 1
 
     # theta1
@@ -77,21 +64,32 @@ SAME <- function(Y0, X, W_tilde,
     for(i in 1:mcmc_samples_theta1){
         ## Step 1: Update theta2 for Lambda[i] times
         start_idx = sum(Lambda[1:i])+1
-        end_idx = sum(Lambda[1:(i+1)])
+        end_idx = sum(Lambda[1:(i+1)])        
         Lambdai = Lambda[i+1]
+        print(c(start_idx,end_idx, Lambdai))
+
         k=1
+        j = start_idx ## for debugging
         for(j in start_idx:end_idx){
             tau_e_est[j+1,] <- update_tau_e(Y0, W_tilde, # input
                             alpha_unif_est[j], w_est[[1]], z_est, # est
                             alpha_e = alpha_prior_e, beta_e = beta_prior_e # noninformative prior
                             )
             alpha_unif_est[j+1,] <- update_alpha_unif(Y0, W_tilde,
-                                w_est[[1]], z_est, tau_e_est[j+1]
+                                w_est[[1]], z_est, tau_e_est[j+1,]
                                 )
+            if( i  == 1) {
+                last_v = 1
+            }else if( k == 1) 
+            {
+                last_v = Lambda[i+1]
+            }else {last_v = k-1}
             gamma_est[[k]] <- update_gamma(W_tilde, 
-                            w_est, pi_ber_est[j], v_est[[Lambda[i+1]]], tau_w_est[j]
-                            )
-            v_est[[k]]<-update_v(tau_w, w_est, gamma_est[[k]],
+                            w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
+                            )                    
+            
+        
+            v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                         tau_v=tau_v
                         )
             pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
@@ -108,12 +106,12 @@ SAME <- function(Y0, X, W_tilde,
         }
 
         ## Step 2: Update theta1 for one time
-        tau_e_same <- matrix(tau_e_est[start_idx:end_idx,], nrow = 1, ncol = Lambdai)
-        alpha_same <- matrix(alpha_unif_est[start_idx:end_idx,], nrow = 1, ncol = Lambdai)
+        tau_e_same <- matrix(tau_e_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
+        alpha_same <- matrix(alpha_unif_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
         gamma_same <- gamma_est[1:(k-1)]
         v_same <- v_est[1:(k-1)]
-        tau_x_same <- t(matrix(tau_x_est[start_idx:end_idx,],nrow = Lambdai, ncol = D))
-        tau_w_same <- matrix(tau_w_est, nrow = 1, ncol = Lambdai)
+        tau_x_same <- t(matrix(tau_x_est[(start_idx+1):(end_idx+1),],nrow = Lambdai, ncol = D))
+        tau_w_same <- matrix(tau_w_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
  
         z_est <- update_z(Y0, X0, W_tilde,
                       tau_e_same, alpha_same, z_est, w_est, t0=1
