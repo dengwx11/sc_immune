@@ -20,17 +20,17 @@ update_z <- function(Y0, X0, W_tilde,
 
   tau_z <- sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]]^2) + 1 )
   tau_z <- matrix(tau_z, nrow = Lambdai, ncol = K)
-  tau_z <- apply(tau_z, 1, sum)
   
   for(k in 1:K){
-    tau_zk <- 1/tau_z[k]
-    res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new + matrix(w_p[,k],ncol=1) %*% matrix(z_new[k,],nrow = 1))
-      mu_zk <- sapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]][,k] * res[[j]]))/tau_zk
+    tau_zk <- tau_z[k]
+    res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new )
+    mu_zk <- sapply(1:Lambdai, function(j) tau_e[,j] * matrix(w_pseudo[[j]][,k],nrow = 1) %*% res[[j]])/tau_zk
     mu_zk <- matrix(mu_zk, nrow = Lambdai, ncol = N)
-    mu_zk <- apply(mu_zk, 1, sum)
-    z_new[k,] <- sapply(mu_zk, function(mu_zkn) rnorm(mu_zkn, 1/tau_zk, 1))
+    z_new[k,] <- sapply(mu_zk, function(mu_zkn) rnorm(1, mu_zkn, 1/tau_zk))
   }
+
   return(z_new)
+  
 }
 
 update_w <- function(Y0, X0, W_tilde,
