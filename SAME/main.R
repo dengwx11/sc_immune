@@ -29,13 +29,22 @@ c_k = same_input$c_k
 C0 = sum(c_k)
 W_tilde = same_input$W_tilde
 YSG =  same_input$YSG
+true_z = same_input$true_Z
+true_w_sc =  same_input$true_w$w
 
+
+## check out assumption
+true_w = 0.5*W_tilde + 0.5*true_w_sc[[1]]
+true_e  = Y0-true_w%*%true_z
+str(true_e)
+hist(true_e,100)
+hist(Y0,100)
 
 
 # Starting values
 mcmc_samples_theta1 = 100
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
-
+Lambda = c(0,rep(1,mcmc_samples_theta1))
 
 
 rst <- SAME(Y0, X, W_tilde,

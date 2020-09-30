@@ -5,6 +5,8 @@ source("SAME/clean_format.R")
 
 
 
+
+
 SAME <- function(Y0, X, W_tilde,
                  mcmc_samples_theta1, Lambda, c_k, YSG)
 {
@@ -59,9 +61,10 @@ SAME <- function(Y0, X, W_tilde,
     for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first item = t0 tissue 
 
 
+
     ## SAME
 
-    for(i in 1:mcmc_samples_theta1){
+    for(i in 1:4){
         ## Step 1: Update theta2 for Lambda[i] times
         start_idx = sum(Lambda[1:i])+1
         end_idx = sum(Lambda[1:(i+1)])        

@@ -31,6 +31,8 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
     same_input$T = T
     same_input$K = K
     same_input$D = D
+    same_input$true_Z = Z
+    same_input$true_w =  w_sim_output
 
 
     c_k = Reduce(function(d1,d2){
@@ -41,7 +43,7 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
 
 
     C0 = sum(c_k)
-    same_input$W_tilde = X_sim_output[[i]]$w_tilde
+    same_input$W_tilde = X_sim_output[[1]]$w_tilde
     same_input$YSG = c(1:D)
 
     return(same_input)

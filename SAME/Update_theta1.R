@@ -66,7 +66,7 @@ update_w <- function(Y0, X0, W_tilde,
         tau_wt <- tau_wt + Reduce('+', tau_wt0)
        
         #tau_wtk <- tau_wt[,k] ## vector of length D
-        res <- lapply(1:Lambdai, function(j) Y0- alpha[1,j] * (W_tilde - wt_new) %*% z )  ## list of number Lamdai of matrix of D*N, Lambdai*D*N
+        res <- lapply(1:Lambdai, function(j) Y0- alpha[1,j] * W_tilde  %*% z - (alpha[1,j] * W_tilde + (1-alpha[1,j]) * wt_new) %*% z)  ## list of number Lamdai of matrix of D*N, Lambdai*D*N
         res <- lapply(res, function(r) r %*% t(z)) # Lambdai*D*K
 
         mu_wt <- Reduce('+', res) + Reduce('+', res1) + Reduce('+', res2) # D*K
