@@ -69,7 +69,7 @@ SAME <- function(Y0, X, W_tilde,
         print(c(start_idx,end_idx, Lambdai))
 
         k=1
-        j = start_idx ## for debugging
+        #j = start_idx ## for debugging
         for(j in start_idx:end_idx){
             tau_e_est[j+1,] <- update_tau_e(Y0, W_tilde, # input
                             alpha_unif_est[j], w_est[[1]], z_est, # est
@@ -106,7 +106,7 @@ SAME <- function(Y0, X, W_tilde,
         }
 
         ## Step 2: Update theta1 for one time
-        tau_e_same <- matrix(tau_e_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
+        tau_e_same <- matrix(tau_e_est[(start_idx+1):(end_idx+1),], nrow = D, ncol = Lambdai)
         alpha_same <- matrix(alpha_unif_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
         gamma_same <- gamma_est[1:(k-1)]
         v_same <- v_est[1:(k-1)]
@@ -132,7 +132,7 @@ SAME <- function(Y0, X, W_tilde,
     rst$theta2$alpha_unif <- alpha_unif_est
     rst$theta2$gamma <- gamma_est
     rst$theta2$v <- v_est
-    rst$theta2$pi <- pi_ber_est
+    rst$theta2$pi_ber <- pi_ber_est
     rst$theta2$tau_x <- tau_x_est
     rst$theta2$tau_w <- tau_w_est
 
