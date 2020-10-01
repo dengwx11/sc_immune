@@ -56,7 +56,7 @@ SAME <- function(Y0, X, W_tilde,
     tau_w_est[1] <- 1
 
     # theta1
-    z_est <- matrix(rnorm(K*N,mean = 2,sd = 1),nrow = K, ncol = N)
+    z_est <- abs(matrix(rnorm(K*N,mean = 0.8,sd = 1),nrow = K, ncol = N))
     w_est <- list()
     for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first item = t0 tissue 
 

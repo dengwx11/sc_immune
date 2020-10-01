@@ -161,7 +161,7 @@ simulate_X <- function(D, K, w_output, T){
 #Y=W*Z+e 0.001 e mu_e=0, tau_e 
 #simulate Y
 simulate_y <- function(w_sim_output, X_sim_output, Z, D, N,
-                        alpha = 0.5, mu_e = 0, tau_e = 100){
+                        alpha = 0.5, mu_e = 0, tau_e = 1000){
     W = (1 - alpha)*(w_sim_output$w[[1]]) + alpha*(X_sim_output$w_tilde)
     e <- matrix(rnorm(D*N, mu_e, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
     e[e < 0] = 0.001

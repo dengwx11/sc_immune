@@ -12,7 +12,7 @@ update_z <- function(Y0, X0, W_tilde,
  ## matrix -> list (length = Lambdai )
  ####                        
   Lambdai = ncol(tau_e)
-  t0 = 1
+
   w_t0 = w[[t0]]
   ## here below z is updated by row
   z_new <- z
