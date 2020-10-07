@@ -61,7 +61,8 @@ update_gamma <- function(W_tilde,
     ## gamma_new: a matrix of Bernoulli variables, D*K
     #############                                 
     gamma_new <- matrix(0, nrow = D, ncol = K)
-    para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
+    para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + 
+                (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
     for (d in 1:D){
         for (k in 1:K){
             p_temp <- 1/(1+exp(-para[d,k]))

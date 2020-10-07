@@ -31,6 +31,7 @@ W_tilde = same_input$W_tilde
 YSG =  same_input$YSG
 true_z = same_input$true_Z
 true_w_sc =  same_input$true_w$w
+raw_X = same_input$raw_X
 
 
 ## check out assumption
@@ -40,6 +41,7 @@ str(true_e)
 hist(true_e,100)
 hist(Y0,100)
 
+cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 
 # Starting values
 mcmc_samples_theta1 = 100

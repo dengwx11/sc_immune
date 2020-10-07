@@ -109,6 +109,7 @@ generate_z <- function(K,N){
 simulate_X <- function(D, K, w_output, T){
 
     X <- list()
+    tau_xd = rgamma(D, 1, 0.001)
     for(t in 1:T){
         X[[t]] <- list()
         celltype.list <- c()
@@ -117,7 +118,7 @@ simulate_X <- function(D, K, w_output, T){
         
         X[[t]]$counts <- matrix(0, nrow = D, ncol = sum(c_k))
         X[[t]]$Celltype_used <- rep("unknown", sum(c_k))
-        X[[t]]$tau_xd <- rgamma(D, 1, 1) #sample random tau_xd from gamma distribution
+        X[[t]]$tau_xd <- tau_xd #sample random tau_xd from gamma distribution
         X[[t]]$c_k <- c_k
         X[[t]]$w_tilde <- matrix(0, nrow = D, ncol = K)
         end_idx = 0
@@ -127,7 +128,7 @@ simulate_X <- function(D, K, w_output, T){
             end_idx = start_idx + c_k[k] - 1
             for (d in 1:D){
                 for (i in start_idx:end_idx){ ### please check here, if wdkt>0, xdkc < 0, should x_dkc = 0.001? or abs(rnorm()), or 0.
-                    if (w[d,k]==0){
+                    if (w[d,k]>0){
                         X[[t]]$counts[d,i] = rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))
                         if (X[[t]]$counts[d,i]<0){X[[t]]$counts[d,i] = 0.001}
                     }else{

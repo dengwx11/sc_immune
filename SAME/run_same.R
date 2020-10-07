@@ -38,8 +38,8 @@ SAME <- function(Y0, X, W_tilde,
     mcmc_samples_theta2 = sum(Lambda)
     tau_e_est <- matrix(0.01, nrow =  mcmc_samples_theta2+1, ncol = D)
     tau_e_est[1] <- 1
-    alpha_unif_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
-    alpha_unif_est[1] <- 0.5
+    alpha_unif_est <- matrix(0.5, nrow =  mcmc_samples_theta2+1, ncol = 1)
+    #alpha_unif_est[1] <- 0.5
     gamma_est <- list()
     for(i in 1:Lambda[length(Lambda)]){
         gamma_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K)
@@ -48,23 +48,24 @@ SAME <- function(Y0, X, W_tilde,
     for(i in 1:Lambda[length(Lambda)]){
         v_est[[i]] <- abs(matrix(rnorm(D*K,mean = 2,sd = 1),nrow = D, ncol = K))
     }
-    pi_ber_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
-    pi_ber_est[1] <- 0.5
-    tau_x_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = D)
+    pi_ber_est <- matrix(0.3, nrow =  mcmc_samples_theta2+1, ncol = 1)
+    pi_ber_est[1] <- 0.3
+    tau_x_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
     tau_x_est[1,] <- 1
-    tau_w_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
-    tau_w_est[1] <- 1
+    tau_w_est <- matrix(4, nrow =  mcmc_samples_theta2+1, ncol = 1)
+    tau_w_est[1] <- 4
 
     # theta1
-    z_est <- abs(matrix(rnorm(K*N,mean = 0.8,sd = 1),nrow = K, ncol = N))
-    w_est <- list()
-    for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first item = t0 tissue 
-
+    #z_est <- abs(matrix(rnorm(K*N,mean = 0.8,sd = 1),nrow = K, ncol = N))
+    #w_est <- list()
+    #for(i in 1:T) w_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K) # first item = t0 tissue 
+    z_est = true_z
+    w_est = same_input$true_w
 
 
     ## SAME
 
-    for(i in 1:4){
+    for(i in 1:10){
         ## Step 1: Update theta2 for Lambda[i] times
         start_idx = sum(Lambda[1:i])+1
         end_idx = sum(Lambda[1:(i+1)])        
@@ -78,9 +79,9 @@ SAME <- function(Y0, X, W_tilde,
                             alpha_unif_est[j], w_est[[1]], z_est, # est
                             alpha_e = alpha_prior_e, beta_e = beta_prior_e # noninformative prior
                             )
-            alpha_unif_est[j+1,] <- update_alpha_unif(Y0, W_tilde,
-                                w_est[[1]], z_est, tau_e_est[j+1,]
-                                )
+            #alpha_unif_est[j+1,] <- update_alpha_unif(Y0, W_tilde,
+            #                    w_est[[1]], z_est, tau_e_est[j+1,]
+            #                    )
             if( i  == 1) {
                 last_v = 1
             }else if( k == 1) 
@@ -142,3 +143,6 @@ SAME <- function(Y0, X, W_tilde,
     return(rst)
 
 }
+
+## for debug
+hist((v_est[[k]]*gamma_est[[k]])[which(gamma_est[[k]]==1)],100)

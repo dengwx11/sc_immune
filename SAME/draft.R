@@ -7,6 +7,9 @@ saveRDS(same_input,'data/Pseudo_Bulk/SAME_Input.rds')
 alpha = alpha_unif_est[j]
 w_t0 = w_est[[1]]
 z = z_est
+alpha_e = 10^(-6)
+beta_e = 10^(-6)
+
 
 # debug gamma
 W_T <- w_est
