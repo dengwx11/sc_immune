@@ -25,6 +25,8 @@ update_z <- function(Y0, X0, W_tilde,
 
   res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new )
   mu_z <- lapply(1:Lambdai, function(j) t(tau_e[,rep(j,K)] * w_pseudo[[j]]) %*% res[[j]]  )
+  res <- lapply(1:Lambdai, function(j) matrix(apply(w_pseudo[[j]]^2 * tau_e[,rep(j,K)],2,sum),nrow=K,ncol=1)[,rep(1,N)])
+  mu_z <- lapply(1:Lambdai, function(j) mu_z[[j]] + res[[j]]*z_new  )
   mu_z <- Reduce('+', mu_z)/tau_z
 
   for(k in 1:K){
@@ -38,36 +40,44 @@ update_z <- function(Y0, X0, W_tilde,
   
 }
 
-update_w <- function(Y0, X0, W_tilde,
+update_w <- function(Y0, X_mat, W_tilde,
                       tau_e, alpha, gamma, v, tau_x, tau_w, z, w, t0=1
                       ){
   Lambdai = ncol(tau_e)
   end_idx = 0
   w_new <- list()
+  
   for(t in 1:T){
     wt_new <- w[[t]]
-    Xt <- X[[t]]
+    Xt <- X_mat[[t]]
     ## here below w is updated by each element w_t0[d,k]
     C = as.vector(c_k[,t])
+    
     start_idx <- end_idx + 1
     end_idx <- start_idx + sum(c_k[,t])-1
-
+    
     tau_wt <- lapply(1:Lambdai, function(j) matrix(tau_x[,j], nrow = D, ncol = 1) %*% matrix(C, nrow =1, ncol=K)+tau_w[1,j])
     tau_wt <- Reduce('+', tau_wt)
 
     res1 <- sapply(c(1:K), function(k) apply(Xt[, Cl[start_idx:end_idx] == k],1,sum) )
-    res1 <- tau_x[,rep(1,K)] * res1
+
+    res1 <- lapply(1:Lambdai, function(j) tau_x[,rep(j,K)] * res1)
+
     res2 <- lapply(1:Lambdai, function(j) tau_w[1,j]*v[[j]]*gamma[[j]])
 
     
     if(t == t0){
         tau_wt0 <- lapply(c(1:Lambdai), function(j) 
-        (1-alpha[1,j])^2 * tau_e[,j] %*% (matrix(apply(z, 1,sum), nrow = 1, ncol = K))^2 )  ## Lambdai*D*K
+        (1-alpha[1,j])^2 * tau_e[,j] %*% matrix(apply(z^2, 1,sum), nrow = 1, ncol = K) )  ## Lambdai*D*K
         tau_wt <- tau_wt + Reduce('+', tau_wt0)
        
         #tau_wtk <- tau_wt[,k] ## vector of length D
-        res <- lapply(1:Lambdai, function(j) Y0- alpha[1,j] * W_tilde  %*% z - (alpha[1,j] * W_tilde + (1-alpha[1,j]) * wt_new) %*% z)  ## list of number Lamdai of matrix of D*N, Lambdai*D*N
+        res <- lapply(1:Lambdai, function(j) Y0- (alpha[1,j] * W_tilde + (1-alpha[1,j]) * wt_new) %*% z)  ## list of number Lamdai of matrix of D*N, Lambdai*D*N
         res <- lapply(res, function(r) r %*% t(z)) # Lambdai*D*K
+        res0 <- lapply(1:Lambdai, function(j) (1-alpha[1,j]) * wt_new * matrix(apply(z^2,1,sum), nrow = 1, ncol=K)[rep(1,D),]) # Lambdai*D*K
+        res <- lapply(1:Lambdai, function(j) res[[j]]+res0[[j]])
+        res <- lapply(1:Lambdai, function(j) res[[j]] * (1-alpha[1,j]) * tau_e[,rep(j,K)])
+
 
         mu_wt <- Reduce('+', res) + Reduce('+', res1) + Reduce('+', res2) # D*K
     } else{      

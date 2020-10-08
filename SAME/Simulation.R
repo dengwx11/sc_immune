@@ -111,11 +111,11 @@ simulate_X <- function(D, K, w_output, T){
     X <- list()
     tau_xd = rgamma(D, 1, 0.001)
     for(t in 1:T){
+
         X[[t]] <- list()
         celltype.list <- c()
         w <- as.matrix(w_output$w[[t]])
         c_k <- sample(100:200, size = K) #set the size for each cell type
-        
         X[[t]]$counts <- matrix(0, nrow = D, ncol = sum(c_k))
         X[[t]]$Celltype_used <- rep("unknown", sum(c_k))
         X[[t]]$tau_xd <- tau_xd #sample random tau_xd from gamma distribution

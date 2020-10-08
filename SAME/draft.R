@@ -28,6 +28,7 @@ tau_e = tau_e_same
 alpha = alpha_same
 z = z_est
 w = w_est
+t0= 1
 
 
 

@@ -3,17 +3,16 @@ set.seed(2020)
 library(Seurat)
 
 
-T=4
-D=500
-K=3
-pi_ber = 0.3
-N = 200 # bulk Y sample size
-Iteration = 500 ## iteration number to get the largest angle between the vectors
+#T=4
+#D=500
+#K=3
+#pi_ber = 0.3
+#N = 200 # bulk Y sample size
+#Iteration = 500 ## iteration number to get the largest angle between the vectors
 
 generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
     w_sim_output <- simulate_sigmat_w(Iteration, D, K, pi_ber, T)
     Z <- generate_z(K, N)
-    T=4
     X_sim_output <- simulate_X(D, K, w_sim_output, T)
     X<-list()
     for(i in 1:T) {
@@ -37,11 +36,14 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
     ## save other information
     same_input$raw_X = X_sim_output
 
-
+    if(T>1){
     c_k = Reduce(function(d1,d2){
     if(!is.numeric(d1)) return(cbind(as.matrix(d1$c_k,ncol=1),as.matrix(d2$c_k,ncol=1)))
     else return(cbind(d1,as.matrix(d2$c_k,ncol=1)))
     } ,X_sim_output)
+    }else{
+        c_k = X_sim_output[[1]]$c_k
+    }
     same_input$c_k = c_k
 
 
@@ -53,9 +55,9 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
 }
 
 ## for debug
-tmp <- matrix(w_sim_output$w[[1]][,1])
-for(i in 2:T){
-    tmp <- cbind(tmp, w_sim_output$w[[i]][,1])
-}
+#tmp <- matrix(w_sim_output$w[[1]][,1])
+#for(i in 2:T){
+#    tmp <- cbind(tmp, w_sim_output$w[[i]][,1])
+#}
 
-cbind(X_sim_output[[1]]$w_tilde, w_sim_output$w[[1]])
+#cbind(X_sim_output[[1]]$w_tilde, w_sim_output$w[[1]])
