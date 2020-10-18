@@ -8,7 +8,7 @@ source("SAME/clean_format.R")
 
 
 SAME <- function(Y0, X, W_tilde,
-                 mcmc_samples_theta1, Lambda, c_k, YSG)
+                 mcmc_samples_theta1, Lambda, c_k, YSG, alpha = 0.5)
 {
 
     Cl <- get_Cl(X)
@@ -38,7 +38,7 @@ SAME <- function(Y0, X, W_tilde,
     mcmc_samples_theta2 = sum(Lambda)
     tau_e_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
     tau_e_est[1] <- 1000
-    alpha_unif_est <- matrix(0.5, nrow =  mcmc_samples_theta2+1, ncol = 1)
+    alpha_unif_est <- matrix(alpha, nrow =  mcmc_samples_theta2+1, ncol = 1)
     #alpha_unif_est[1] <- 0.5
     gamma_est <- list()
     for(i in 1:Lambda[length(Lambda)]){

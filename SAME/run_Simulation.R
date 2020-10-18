@@ -10,19 +10,29 @@ library(Seurat)
 #N = 200 # bulk Y sample size
 #Iteration = 500 ## iteration number to get the largest angle between the vectors
 
-generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
+generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
     w_sim_output <- simulate_sigmat_w(Iteration, D, K, pi_ber, T)
     Z <- generate_z(K, N)
-    X_sim_output <- simulate_X(D, K, w_sim_output, T)
+    X_sim_output_original <- simulate_X(D, K, w_sim_output, T)
+    
+
+
+    Y <- simulate_y(w_sim_output, X_sim_output_original[[1]], Z, D, N)
+
+    if(corrupt>0) {
+        X_sim_output <- corrupt_X(X_sim_output_original, corrupt_pi)
+        
+    }else{
+        X_sim_output <- X_sim_output_original
+    }
+
     X<-list()
-    for(i in 1:T) {
+    for(i in 1:T){
         colnames(X_sim_output[[i]]$counts) <- c(1:ncol(X_sim_output[[i]]$counts))
         rownames(X_sim_output[[i]]$counts) <- c(1:D)
         X[[i]] <- CreateSeuratObject(X_sim_output[[i]]$counts)
         X[[i]]$Celltype_used <- X_sim_output[[i]]$Celltype_used
     }
-
-    Y <- simulate_y(w_sim_output, X_sim_output[[1]], Z, D, N)
 
     same_input <- list()
     same_input$Y0 = Y
@@ -30,6 +40,7 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
     same_input$T = T
     same_input$K = K
     same_input$D = D
+    same_input$X_original <- X_sim_output_original
     same_input$true_Z = Z
     same_input$true_w =  w_sim_output
 
@@ -61,3 +72,4 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration){
 #}
 
 #cbind(X_sim_output[[1]]$w_tilde, w_sim_output$w[[1]])
+#cbind(X_sim_output[[1]]$w_tilde[,2],X_sim_output_original[[1]]$w_tilde[,2])

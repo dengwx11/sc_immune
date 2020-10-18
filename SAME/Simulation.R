@@ -146,6 +146,30 @@ simulate_X <- function(D, K, w_output, T){
     return(X)
 }
 
+corrupt_X <- function(X_sim_output, corrupt_pi = 0.2){    
+    for(t in 1:T){
+        X <- X_sim_output[[t]]
+        corrupt_bin <- matrix(rbinom(sum(X$c_k), 1, 1-corrupt_pi), nrow = 1, ncol = sum(X$c_k))[rep(1,D),]
+        X$counts <- X$counts * corrupt_bin
+        c_k <- X$c_k
+        end_idx = 0
+        for (k in 1:K){
+            start_idx = end_idx + 1
+            end_idx = start_idx + c_k[k] - 1
+            for (d in 1:D){                
+                X$w_tilde[d,k] = mean(X$counts[d,start_idx:end_idx])
+            }
+        }
+
+        X_sim_output[[t]] <- X
+    }
+    return(X_sim_output)
+}
+
+
+#X_sim_output <- corrupt_X(X_sim_output_original, corrupt_pi = 0.2)
+#cbind(X_sim_output[[1]]$w_tilde[,2],X_sim_output_original[[1]]$w_tilde[,2])
+
 #calculate W_tilde given X, if X does not contain w_tilde
 #calculate_w_tilde <- function(X, D, K){
 #    celltype.list <- X$Celltype_list
