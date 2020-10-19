@@ -12,7 +12,7 @@
 #}
 
 #generate v
-generate_v <- function(D, K, mu=1, tau=4){
+generate_v <- function(D, K, mu=10, tau=.1){
     v <- matrix(abs(rnorm(D*K, mu, sd = (1/sqrt(tau)))), nrow = D, ncol = K)
     return(v)
 }
@@ -25,7 +25,7 @@ generate_gamma <- function(pi_ber, D, K
 }
 
 #generate w
-generate_w <- function(v, gamma,D, K, tau_w=4
+generate_w <- function(v, gamma,D, K, tau_w=tau_w_para
                             ){   
     w <- matrix(0, nrow = D, ncol = K)
     for (d in 1:D){
@@ -109,13 +109,13 @@ generate_z <- function(K,N){
 simulate_X <- function(D, K, w_output, T){
 
     X <- list()
-    tau_xd = rgamma(D, 1, 0.001)
+    tau_xd = rgamma(D, 1, tau_xd_beta_para)
     for(t in 1:T){
 
         X[[t]] <- list()
         celltype.list <- c()
         w <- as.matrix(w_output$w[[t]])
-        c_k <- sample(100:200, size = K) #set the size for each cell type
+        c_k <- sample(500:1000, size = K) #set the size for each cell type
         X[[t]]$counts <- matrix(0, nrow = D, ncol = sum(c_k))
         X[[t]]$Celltype_used <- rep("unknown", sum(c_k))
         X[[t]]$tau_xd <- tau_xd #sample random tau_xd from gamma distribution

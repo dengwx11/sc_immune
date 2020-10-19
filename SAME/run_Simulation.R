@@ -19,7 +19,7 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
 
     Y <- simulate_y(w_sim_output, X_sim_output_original[[1]], Z, D, N)
 
-    if(corrupt>0) {
+    if(corrupt_pi>0) {
         X_sim_output <- corrupt_X(X_sim_output_original, corrupt_pi)
         
     }else{

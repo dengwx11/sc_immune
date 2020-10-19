@@ -31,7 +31,12 @@ w = w_est
 t0= 1
 
 
-
+# debug twu_w
+W_T = w_est
+v = v_est[[50]] 
+gamma = gamma_est[[50]]
+alpha_w = 10^(-6) 
+beta_w = 10^(-6)
 
 
 

@@ -56,8 +56,8 @@ SAME <- function(Y0, X, W_tilde,
     #tau_x_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
     #tau_x_est[1,] <- 1
     tau_x_est <- matrix(raw_X[[1]]$tau_xd, nrow =  1, ncol = D)[rep(1,mcmc_samples_theta2+1),]
-    tau_w_est <- matrix(4, nrow =  mcmc_samples_theta2+1, ncol = 1)
-    tau_w_est[1] <- 4
+    tau_w_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
+    tau_w_est[1] <- 10
 
     # theta1
     z_est <- abs(matrix(rnorm(K*N,mean = 0.8,sd = 1),nrow = K, ncol = N))
@@ -127,7 +127,7 @@ SAME <- function(Y0, X, W_tilde,
                       )
                     
         w_est <- update_w(Y0, X_mat, W_tilde,
-                      tau_e_same, alpha_same, gamma_same, v_same, tau_x_same, tau_w_same, z_est, w_est, t0=1
+                      tau_e_same, alpha_same, gamma_same, v_same, tau_x_same, tau_w_same, z_est, w_est, t0=1, Cl
                       )
                      
     }

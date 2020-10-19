@@ -41,7 +41,7 @@ update_z <- function(Y0, X0, W_tilde,
 }
 
 update_w <- function(Y0, X_mat, W_tilde,
-                      tau_e, alpha, gamma, v, tau_x, tau_w, z, w, t0=1
+                      tau_e, alpha, gamma, v, tau_x, tau_w, z, w, t0=1, Cl
                       ){
   Lambdai = ncol(tau_e)
   end_idx = 0
