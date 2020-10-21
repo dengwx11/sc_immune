@@ -28,7 +28,7 @@ D=500
 K=3
 pi_ber = 0.3
 N = 200 # bulk Y sample size
-Iteration = 500 ## iteration number to get the largest angle between the vectors
+Iteration = 100 ## iteration number to get the largest angle between the vectors
 
 tau_w_para = 1
 tau_xd_beta_para = 0.05
@@ -65,9 +65,9 @@ cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 cbind(original_X[[1]]$w_tilde[,2],W_tilde[,2],raw_X[[1]]$w_tilde[,2])
 
 # Starting values
-mcmc_samples_theta1 = 50
-Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
-#Lambda = c(0,rep(1,mcmc_samples_theta1))
+mcmc_samples_theta1 = 100
+#Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
+Lambda = c(0,rep(1,mcmc_samples_theta1))
 
 
 rst <- SAME(Y0, X, W_tilde,
@@ -75,6 +75,7 @@ rst <- SAME(Y0, X, W_tilde,
 
 
 z_est <-   rst$theta1$z 
+str(z_est)
 w_est <-  rst$theta1$w  
 tau_e_est <-  rst$theta2$tau_e  
 alpha_unif_est  <- rst$theta2$alpha_unif  
@@ -89,7 +90,7 @@ tau_w_est  <-   rst$theta2$tau_w
 #hist((v_est[[k]]*gamma_est[[k]])[which(gamma_est[[k]]==1)],100)
 
 i=1
-k=30
+k=1
 cbind(gamma_est[[k]][,i]*v_est[[k]][,i],true_gamma[,i]*true_v[,i])
 tbl <- table(gamma_est[[k]][,i],true_gamma[,i])
 print(tbl)

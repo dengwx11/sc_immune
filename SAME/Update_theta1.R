@@ -18,22 +18,28 @@ update_z <- function(Y0, X0, W_tilde,
   z_new <- z
   w_pseudo <- lapply(1:Lambdai, function(j) alpha[1,j] * W_tilde + (1-alpha[1,j]) * w_t0) ## length of Lambdai list
 
-  tau_z <- lapply(1:Lambdai, function(j) colSums(tau_e[,j] * w_pseudo[[j]]^2) + 1 )
-  tau_z <- Reduce('+', tau_z) # 1*K
-  tau_z <- matrix(tau_z, nrow = K, ncol = 1)[,rep(1,N)]
+  # tau_z <- lapply(1:Lambdai, function(j) colSums(tau_e[,j] * (w_pseudo[[j]])^2) + 1 )
+  # tau_z <- Reduce('+', tau_z) # 1*K
+  # tau_z <- matrix(tau_z, nrow = K, ncol = 1)[,rep(1,N)]
+  # 
+  # 
+  # res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new )
+  # mu_z <- lapply(1:Lambdai, function(j) t(tau_e[,rep(j,K)] * w_pseudo[[j]]) %*% res[[j]]  )
+  # res <- lapply(1:Lambdai, function(j) matrix(apply(w_pseudo[[j]]^2 * tau_e[,rep(j,K)],2,sum),nrow=K,ncol=1)[,rep(1,N)])
+  # mu_z <- lapply(1:Lambdai, function(j) mu_z[[j]] + res[[j]]*z_new  )
+  # mu_z <- Reduce('+', mu_z)/tau_z
+  # 
+  # print(c(mu_z[1,1],tau_z[1,1]))
+  # 
+  # 
+  # for(k in 1:K){
+  #   for(n in 1:N){
+  #     z_new[k,n] <- rnorm(1, mu_z[k,n], sd = sqrt(1/tau_z[k,n]))
+  #   }
+  # }
   
-
-  res <- lapply(w_pseudo, function(w_p) Y0 - w_p %*% z_new )
-  mu_z <- lapply(1:Lambdai, function(j) t(tau_e[,rep(j,K)] * w_pseudo[[j]]) %*% res[[j]]  )
-  res <- lapply(1:Lambdai, function(j) matrix(apply(w_pseudo[[j]]^2 * tau_e[,rep(j,K)],2,sum),nrow=K,ncol=1)[,rep(1,N)])
-  mu_z <- lapply(1:Lambdai, function(j) mu_z[[j]] + res[[j]]*z_new  )
-  mu_z <- Reduce('+', mu_z)/tau_z
-
-  for(k in 1:K){
-    for(n in 1:N){
-      z_new[k,n] <- rnorm(1, mu_z[k,n], sd = sqrt(1/tau_z[k,n]))
-    }
-  }
+  z_new_list <- lapply(1:Lambdai, function(j) solve(t(w_pseudo[[j]])%*%w_pseudo[[j]])%*%t(w_pseudo[[j]])%*%Y0)
+  z_new <- Reduce('+',z_new_list)/Lambdai
   
 
   return(z_new)
