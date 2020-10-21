@@ -25,7 +25,7 @@ source('SAME/run_Simulation.R')
 ######## tune parameter
 T=5
 D=500
-K=7
+K=3
 pi_ber = 0.3
 N = 200 # bulk Y sample size
 Iteration = 500 ## iteration number to get the largest angle between the vectors
@@ -65,7 +65,7 @@ cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 cbind(original_X[[1]]$w_tilde[,2],W_tilde[,2],raw_X[[1]]$w_tilde[,2])
 
 # Starting values
-mcmc_samples_theta1 = 30
+mcmc_samples_theta1 = 50
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 #Lambda = c(0,rep(1,mcmc_samples_theta1))
 
