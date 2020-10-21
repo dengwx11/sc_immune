@@ -65,9 +65,9 @@ cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 cbind(original_X[[1]]$w_tilde[,2],W_tilde[,2],raw_X[[1]]$w_tilde[,2])
 
 # Starting values
-mcmc_samples_theta1 = 100
-#Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
-Lambda = c(0,rep(1,mcmc_samples_theta1))
+mcmc_samples_theta1 = 20
+Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
+#Lambda = c(0,rep(1,mcmc_samples_theta1))
 
 
 rst <- SAME(Y0, X, W_tilde,
