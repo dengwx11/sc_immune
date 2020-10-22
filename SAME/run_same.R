@@ -89,35 +89,38 @@ SAME <- function(Y0, X, W_tilde,
             #                    )
             if( i  == 1) {
                 last_v = 1
-            }else if( k == 1) 
+            }else if( k == 1)
             {
                 last_v = Lambda[i+1]
             }else {last_v = k-1}
-            gamma_est[[k]] <- update_gamma(W_tilde, 
+            gamma_est[[k]] <- update_gamma(W_tilde,
                            w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
-                            )                    
-            
-        
+                            )
+
+
             v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                         tau_v=tau_v
                         )
-            pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
+            pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]],
                             alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
                             )
-            # tau_x_est[j+1,] <- update_tau_x(X, 
+            # tau_x_est[j+1,] <- update_tau_x(X,
             #                 w_est,
             #                 alpha_x = alpha_prior_x, beta_x = beta_prior_x
             #                 )
             tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
                             alpha_w = alpha_prior_w, beta_w = beta_prior_w
-                            )                
+                            )
             k=k+1
         }
+        
+        print(table(gamma_est[[k-1]]))
 
         ## Step 2: Update theta1 for one time
         tau_e_same <- matrix(tau_e_est[(start_idx+1):(end_idx+1),], nrow = D, ncol = Lambdai)
         alpha_same <- matrix(alpha_unif_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
         gamma_same <- gamma_est[1:(k-1)]
+        #print(table(gamma_same[[1]],true_gamma))
         v_same <- v_est[1:(k-1)]
         tau_x_same <- t(matrix(tau_x_est[(start_idx+1):(end_idx+1),],nrow = Lambdai, ncol = D))
         tau_w_same <- matrix(tau_w_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
@@ -126,9 +129,9 @@ SAME <- function(Y0, X, W_tilde,
                       tau_e_same, alpha_same, z_est, w_est, t0=1
                       )
                     
-        w_est <- update_w(Y0, X_mat, W_tilde,
-                      tau_e_same, alpha_same, gamma_same, v_same, tau_x_same, tau_w_same, z_est, w_est, t0=1, Cl
-                      )
+        # w_est <- update_w(Y0, X_mat, W_tilde,
+        #               tau_e_same, alpha_same, gamma_same, v_same, tau_x_same, tau_w_same, z_est, w_est, t0=1, Cl
+        #               )
                      
     }
     print(proc.time() - ptm)
