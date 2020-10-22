@@ -48,7 +48,7 @@ data_preprocessing <- function(data_set_list, # a list of scRNA-seq dataset, and
     rst$W_tilde <- W_tilde
     return(rst)
 }
-
+##load dataset 
 data_dir <- "~/Mydata/HCL/SAME/"
 data_set_list <- list()
 filenames <- c("Lung", "PBMC", "BM", "Liver", "CB", "Kidney")
@@ -57,7 +57,7 @@ for (i in 1:length(filenames)){
   seur <- readRDS(file_dir)
   data_set_list[[i]] <- seur
 }
-
+##subset seur object with 3 cell types
 data_set_list_CT3 <- list()
 filenames <- c("Lung", "PBMC", "BM", "Liver", "CB", "Kidney")
 for (i in 1:length(filenames)){
@@ -67,17 +67,19 @@ for (i in 1:length(filenames)){
   data_set_list_CT3[[i]] <- seur
 }
 
-data_set_list_CT5 <- list()
-filenames <- c("Lung", "PBMC", "BM", "Liver", "CB", "Kidney")
-for (i in 1:length(filenames)){
-  file_dir <- paste0(data_dir, filenames[i], "_sg_seur.rds")
-  seur <- readRDS(file_dir)
-  seur <- subset(seur, subset = SAME_celltype == "Macrophage"| SAME_celltype == "Dendritic"|SAME_celltype == "T" |SAME_celltype == "Neutrophil"|SAME_celltype == "Plasmocyte")
-  data_set_list_CT5[[i]] <- seur
-}
-PseudoBulk_CT3 <- list()
-Proportion_CT3 <- list()
-PseudoBulk_CT5 <- list()
+#data_set_list_CT5 <- list()
+#filenames <- c("Lung", "PBMC", "BM", "Liver", "CB", "Kidney")
+#for (i in 1:length(filenames)){
+#  file_dir <- paste0(data_dir, filenames[i], "_sg_seur.rds")
+#  seur <- readRDS(file_dir)
+#  seur <- subset(seur, subset = SAME_celltype == "Macrophage"| SAME_celltype == "Dendritic"|SAME_celltype == "T" |SAME_celltype == "Neutrophil"|SAME_celltype == "Plasmocyte")
+#  data_set_list_CT5[[i]] <- seur
+#}
+#PseudoBulk_CT3 <- list()
+#Proportion_CT3 <- list()
+#PseudoBulk_CT5 <- list()
+
+##Lung pseudo bulk
 PseudoBulk <- data.frame()
 seur <- data_set_list_CT3[[1]]
 mat <- seur@assays$RNA@counts
@@ -125,8 +127,7 @@ Lung_stat = Lung_stat[,-1]
 #  PseudoBulk_CT3[[i]] <- PseudoBulk
 #  Proportion_CT3[[i]] <- Lung_stat
 #}
-
-celltype.list <- readRDS("~/Mydata/HCL/SAME/celltype.list.rds")
+####SAME
 sg.list <- readRDS("~/Mydata/HCL/SAME/sg.list.rds")
 X <- data_set_list_CT3
 Cl <- get_Cl(X)
@@ -143,11 +144,13 @@ T <- SAME_Input$T
 K <- SAME_Input$K
 D <- SAME_Input$D
 
-
+##run SAME to get w_hat_t0
 rst <- SAME(Y0, X, W_tilde,
             mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1 )
 
 #plot(z_est_200,true_z, xlab = 'estmation',ylab='true', main = 'Z')
+
+##generate pseudo bulk 
 alpha = 0.5
 w_pseudo <- alpha * W_tilde + (1-alpha) * w_t0_100
 tau_e = 1000
@@ -157,6 +160,9 @@ e <- matrix(rnorm(D*N, mu_e, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
 e[e < 0] = 0.001
 Y_sim = w_pseudo %*% Z_sim + e
 saveRDS(Y_sim, "~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3_0.5w_t0.rds")
+saveRDS(Z_sim, "~/Mydata/HCL/SAME/Lung_sg_CT5_0.5w_t0_stat.rds")
+saveRDS(w_t0_100, "~/Mydata/HCL/SAME/Lung_w_t0_lambda100_CT3.rds")
+
 coherent.genes <- c("CD68", "CD163", "CD3E", "CD4", "CD8A", "FOXP3", "GZMA", "NKG7", "CD19", "CD79A", "CD79B", "CD38", "FCER2", "MZB1", "FCER1A", "CPA3", "CD33", "CEACAM8", "CD209", "LYZ", "CD14", "FCGR3A")
 pdf("coherent.genes.pdf", width = 15)
 
