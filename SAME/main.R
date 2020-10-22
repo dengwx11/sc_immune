@@ -28,7 +28,7 @@ D=500
 K=3
 pi_ber = 0.3
 N = 200 # bulk Y sample size
-Iteration = 100 ## iteration number to get the largest angle between the vectors
+Iteration = 500 ## iteration number to get the largest angle between the vectors
 
 tau_w_para = 1
 tau_xd_beta_para = 0.05
@@ -65,17 +65,16 @@ cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 cbind(original_X[[1]]$w_tilde[,2],W_tilde[,2],raw_X[[1]]$w_tilde[,2])
 
 # Starting values
-mcmc_samples_theta1 = 20
+mcmc_samples_theta1 = 30
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 #Lambda = c(0,rep(1,mcmc_samples_theta1))
 
 
 rst <- SAME(Y0, X, W_tilde,
-                 mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
+            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
 
 
 z_est <-   rst$theta1$z 
-str(z_est)
 w_est <-  rst$theta1$w  
 tau_e_est <-  rst$theta2$tau_e  
 alpha_unif_est  <- rst$theta2$alpha_unif  
@@ -90,7 +89,7 @@ tau_w_est  <-   rst$theta2$tau_w
 #hist((v_est[[k]]*gamma_est[[k]])[which(gamma_est[[k]]==1)],100)
 
 i=1
-k=1
+k=30
 cbind(gamma_est[[k]][,i]*v_est[[k]][,i],true_gamma[,i]*true_v[,i])
 tbl <- table(gamma_est[[k]][,i],true_gamma[,i])
 print(tbl)
@@ -136,5 +135,5 @@ z_est_alpha05 <- rst$theta1$z
 z_est_alpha1 <- rst$theta1$z
 
 compare = data.frame(diff = c(as.vector(z_est_alpha1-true_z), as.vector(z_est_alpha05-true_z)), 
-                method = c(rep("alpha 1",K*N),rep("alpha 0.5",K*N)))
+                     method = c(rep("alpha 1",K*N),rep("alpha 0.5",K*N)))
 boxplot(diff~method, data=compare)
