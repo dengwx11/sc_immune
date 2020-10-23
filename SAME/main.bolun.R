@@ -36,7 +36,7 @@ data_preprocessing <- function(data_set_list, # a list of scRNA-seq dataset, and
             W_tilde[,k] = 0.001
         } else {
             seur_t0_k <- seur_t0.list[[celltype.list[k]]]
-            W_tilde[,k] = apply(seur_k@assays$RNA@counts[SG,], 1, mean)
+            W_tilde[,k] = apply(seur_t0_k@assays$RNA@counts[SG,], 1, mean)
         }
     }
     rst <- list()
@@ -133,7 +133,7 @@ X <- data_set_list_CT3
 Cl <- get_Cl(X)
 SAME_Input <- data_preprocessing(data_set_list = data_set_list_CT3,CL = "SAME_celltype",SG = sg.list, celltype.list = Cl$levels)
 Y0 <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3.rds")
-Y0 <- as.matrix(Y0)
+Y0 <- as.matrix(Y0)/10000 #divided by the number of cells
 N = ncol(Y0)
 W_tilde <- SAME_Input$W_tilde
 mcmc_samples_theta1 = 50
