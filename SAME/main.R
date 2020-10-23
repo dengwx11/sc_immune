@@ -9,6 +9,11 @@ K <- as.numeric(args[3])
 
 
 set.seed(2020)
+library(nnls)
+library(MuSiC)
+library(xbioc)
+library(ggplot2)
+library(Biobase)
 #set.seed(2021)
 source('SAME/run_same.R')
 source('SAME/run_Simulation.R')
@@ -25,15 +30,16 @@ source('SAME/run_Simulation.R')
 ######## tune parameter
 T=5
 D=500
-K=3
+K=8
 pi_ber = 0.3
 N = 200 # bulk Y sample size
 Iteration = 500 ## iteration number to get the largest angle between the vectors
 
 tau_w_para = 1
-tau_xd_beta_para = 0.05
+tau_xd_beta_para = 0.1
+corrupt_pi =  0
 ########
-same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=0)
+same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi)
 ###################
 
 
@@ -65,13 +71,13 @@ cbind(raw_X[[1]]$w_tilde[,2],W_tilde[,2])
 cbind(original_X[[1]]$w_tilde[,2],W_tilde[,2],raw_X[[1]]$w_tilde[,2])
 
 # Starting values
-mcmc_samples_theta1 = 30
+mcmc_samples_theta1 = 100
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 #Lambda = c(0,rep(1,mcmc_samples_theta1))
 
 
 rst <- SAME(Y0, X, W_tilde,
-            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
+            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =.5)
 
 
 z_est <-   rst$theta1$z 
@@ -134,6 +140,63 @@ hist(ratio,100)$mids[c(61,67,86)]
 z_est_alpha05 <- rst$theta1$z
 z_est_alpha1 <- rst$theta1$z
 
-compare = data.frame(diff = c(as.vector(z_est_alpha1-true_z), as.vector(z_est_alpha05-true_z)), 
-                     method = c(rep("alpha 1",K*N),rep("alpha 0.5",K*N)))
+
+##### NNLS ####
+z_est_nnls  <- sapply(c(1:N), function(j) nnls(W_tilde, Y0[,j])$x)
+
+##### music ####
+assaycounts <- raw_X[[1]]$counts
+rownames(assaycounts) <- paste0('Gene',c(1:D))
+colnames(assaycounts) <- paste0('Cell',c(1:ncol(assaycounts)))
+pheno <- X[[1]]@meta.data
+pheno$SampleID <- paste0('Cell',c(1:ncol(assaycounts)))
+rownames(pheno) <- paste0('Cell',c(1:ncol(assaycounts)))
+sc.eset <- ExpressionSet(assayData = assaycounts, phenoData = as(data.frame(pheno),"AnnotatedDataFrame"))
+assaycounts <- Y0
+rownames(assaycounts) <- paste0('Gene',c(1:D))
+colnames(assaycounts) <- paste0('ID',c(1:N))
+pheno <- data.frame('subjectID' = paste0('ID',c(1:N)))
+rownames(pheno) <- paste0('ID',c(1:N))
+bulk.eset <- ExpressionSet(assayData = assaycounts, phenoData = as(data.frame(pheno),"AnnotatedDataFrame"))
+# Estimate cell type proportions
+Est.prop = music_prop(bulk.eset = bulk.eset, sc.eset = sc.eset, clusters = 'Celltype_used',
+                               samples = 'SampleID',  verbose = F)
+names(Est.prop)
+z_est_music <- t(Est.prop$Est.prop.weighted)
+z_est_nnls <- t(Est.prop$Est.prop.allgene)
+
+
+
+
+##### CIBERSORTx ####
+str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para)
+sigMat = data.frame("Gene symbol" = paste0('Gene',c(1:D)), W_tilde)
+colnames(sigMat) <- c("Gene symbol",paste0('type',c(1:K)))
+write.table(sigMat,file=paste0("./write/WTilde.",str_para,'.txt'),
+            sep='\t',quote=F, row.names = F)
+bulk = data.frame("Gene" = paste0('Gene',c(1:D)), Y0*20)
+colnames(bulk) <- c("Gene",paste0('ID',c(1:N)))
+write.table(bulk,file=paste0("./write/bulk.",str_para,'.txt'),
+            sep="\t",quote=F, row.names = F)
+sc = data.frame('Gene'=paste0('Gene',c(1:D)), raw_X[[1]]$counts)
+colnames(sc) = c('Gene', raw_X[[1]]$Celltype_used)
+write.table(sc,file=paste0("./write/sc.",str_para,'.txt'),
+            sep='\t',quote=F, row.names = F)
+
+z_est_cibersortx <-read.table('./write/CIBERSORTx_Job7_Results.txt', header=T,sep='\t')
+z_est_cibersortx <- t(z_est_cibersortx[,c(2:(K+1))])/20
+
+####### Final Comparison
+
+compare = data.frame(diff = c(as.vector(z_est_alpha1-true_z), as.vector(z_est_alpha05-true_z), as.vector(z_est_nnls-true_z),
+                              as.vector(z_est_music-true_z), as.vector(z_est_cibersortx-true_z)), 
+                     method = c(rep("alpha_1",K*N),rep("alpha_0.5",K*N), rep("NNLS",K*N),rep("MuSiC",K*N),rep("CIBERSORTx",K*N)),
+                     para = "simulation1")
+write.table(compare,'./write/simulation1.txt',quote = F,sep='\t',row.names = F)
+## simulation1: T=5, D=500, K=8,mu=1,tau_v=4,tau_w=1,tau_xd =0.05
 boxplot(diff~method, data=compare)
+median(z_est_alpha1-true_z)
+median(z_est_alpha05-true_z)
+median(z_est_nnls-true_z)
+median(z_est_music-true_z)
+median(z_est_cibersortx-true_z)
