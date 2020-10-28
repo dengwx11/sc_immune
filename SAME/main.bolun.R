@@ -32,7 +32,7 @@ data_preprocessing <- function(data_set_list, # a list of scRNA-seq dataset, and
     seur_t0 <- data_set_list[[1]]
     for (k in 1:K){
         seur_t0.list <- SplitObject(seur_t0, split.by = CL)
-        if (is.null(seur.list[[celltype.list[k]]])){
+        if (is.null(seur_t0.list[[celltype.list[k]]])){
             W_tilde[,k] = 0.001
         } else {
             seur_t0_k <- seur_t0.list[[celltype.list[k]]]
@@ -81,6 +81,7 @@ for (i in 1:length(filenames)){
 
 ##Lung pseudo bulk
 PseudoBulk <- data.frame()
+PseudoBulk_var <- data.frame()
 seur <- data_set_list_CT3[[1]]
 mat <- seur@assays$RNA@counts
 meta_df <- seur[["SAME_celltype"]]
@@ -95,10 +96,12 @@ for(i in 1:times){
   stat <- as.data.frame(table(meta_df_new))
   Lung_stat[,i+2] =stat[,2]/10000
   for (j in 1:length(rownames(mat_new))) {
-    PseudoBulk[j,i] = sum(mat_new[j,]) + var(mat_new[j,])/50
+    PseudoBulk[j,i] = sum(mat_new[j,]) 
+    PseudoBulk_var[j,i] =  var(mat_new[j,])
   }
   print(paste(i, "th times"))
 }
+e <- matrix(rnorm(length(sg.list)*50, 0, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
 rownames(Lung_stat) = Lung_stat[,1]
 Lung_stat = Lung_stat[,-1]
 
@@ -132,11 +135,22 @@ sg.list <- readRDS("~/Mydata/HCL/SAME/sg.list.rds")
 X <- data_set_list_CT3
 Cl <- get_Cl(X)
 SAME_Input <- data_preprocessing(data_set_list = data_set_list_CT3,CL = "SAME_celltype",SG = sg.list, celltype.list = Cl$levels)
-Y0 <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3.rds")
-Y0 <- as.matrix(Y0)/10000 #divided by the number of cells
-N = ncol(Y0)
+#Y0 <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3.rds")
+#Y0 <- as.matrix(Y0)/10000 #divided by the number of cells
+Pseudo_count <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CTAll_S50.rds")
+Pseudo_var <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CTAll_S50_var.rds")
+Pseudo_error_50 <- matrix(0, nrow = D, ncol = N)
+for (d in 1:D){
+  for (n in 1:N){
+    Pseudo_error_50[d,n] <- rnorm(1, mean = 0, sd = sqrt(Pseudo_var[d,n]/50))
+  }
+}
+Pseudo_norm_var50 <- (as.matrix(Pseudo_count)/10000) + Pseudo_error_50
+Pseudo_norm_var50[Pseudo_norm_var50 <= 0.001 ] = 0.001
+Y0_var50 <- Pseudo_norm_var50
+N = ncol(Y0_var50)
 W_tilde <- SAME_Input$W_tilde
-mcmc_samples_theta1 = 50
+mcmc_samples_theta1 = 100
 Lambda = c(0:mcmc_samples_theta1)
 c_k <- SAME_Input$c_k
 YSG <- sg.list
@@ -145,10 +159,30 @@ K <- SAME_Input$K
 D <- SAME_Input$D
 
 ##run SAME to get w_hat_t0
-rst <- SAME(Y0, X, W_tilde,
-            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1 )
+#rst <- SAME(Y0, X, W_tilde,
+#            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1 )
 
 #plot(z_est_200,true_z, xlab = 'estmation',ylab='true', main = 'Z')
+
+
+rst_var50_alpha1 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
+rst_var50_alpha0 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =0)
+rst_var50_alpha0.5 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =0.5)
+par(mfrow = c(1,2))
+plot(as.vector(rst_var50_alpha1$theta1$z), as.matrix(Lung_sg_CT5_S50_stat[,-1]), xlab = "z_lambda100", ylab = "true_z", main = "alpha = 1, e_var = var/50")
+plot(as.vector(rst_var50_alpha1$theta1$w[[1]]), W_tilde, xlab = "w_t0_lambda100", ylab = "w_tilde", main = "alpha = 1, e_var = var/50")
+
+
+plot(as.vector(rst_var50_alpha0$theta1$z), as.matrix(Lung_sg_CT5_S50_stat[,-1]), xlab = "z_lambda100", ylab = "true_z", main = "alpha = 0, e_var = var/50")
+plot(as.vector(rst_var50_alpha0$theta1$w[[1]]), W_tilde, xlab = "w_t0_lambda100", ylab = "w_tilde", main = "alpha = 0, e_var = var/50")
+
+
+plot(as.vector(rst_var50_alpha0.5$theta1$z), as.matrix(Lung_sg_CT5_S50_stat[,-1]), xlab = "z_lambda100", ylab = "true_z", main = "alpha = 0.5, e_var = var/50")
+plot(as.vector(rst_var50_alpha0.5$theta1$w[[1]]), W_tilde, xlab = "w_t0_lambda100", ylab = "w_tilde", main = "alpha = 0.5, e_var = var/50")
+
+
+
+
 
 ##generate pseudo bulk 
 alpha = 0.5
