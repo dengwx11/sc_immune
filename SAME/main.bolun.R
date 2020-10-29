@@ -101,7 +101,7 @@ for(i in 1:times){
   }
   print(paste(i, "th times"))
 }
-e <- matrix(rnorm(length(sg.list)*50, 0, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
+
 rownames(Lung_stat) = Lung_stat[,1]
 Lung_stat = Lung_stat[,-1]
 
@@ -132,13 +132,24 @@ Lung_stat = Lung_stat[,-1]
 #}
 ####SAME
 sg.list <- readRDS("~/Mydata/HCL/SAME/sg.list.rds")
-X <- data_set_list_CT3
+X <- data_set_list_CT3 ##change the dataset here
 Cl <- get_Cl(X)
-SAME_Input <- data_preprocessing(data_set_list = data_set_list_CT3,CL = "SAME_celltype",SG = sg.list, celltype.list = Cl$levels)
+SAME_Input <- data_preprocessing(data_set_list = data_set_list_CT3, ##change the dataset here
+                                  CL = "SAME_celltype",SG = sg.list, celltype.list = Cl$levels)
+
+W_tilde <- SAME_Input$W_tilde
+mcmc_samples_theta1 = 100
+Lambda = c(0:mcmc_samples_theta1)
+c_k <- SAME_Input$c_k
+YSG <- sg.list
+T <- SAME_Input$T
+K <- SAME_Input$K
+D <- SAME_Input$D
 #Y0 <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3.rds")
 #Y0 <- as.matrix(Y0)/10000 #divided by the number of cells
-Pseudo_count <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CTAll_S50.rds")
-Pseudo_var <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CTAll_S50_var.rds")
+Pseudo_count <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3_S50.rds")
+Pseudo_var <- readRDS("~/Mydata/HCL/SAME/PseudoBulk_Lung_sg_CT3_S50_var.rds")
+N = ncol(Pseudo_count)
 Pseudo_error_50 <- matrix(0, nrow = D, ncol = N)
 for (d in 1:D){
   for (n in 1:N){
@@ -148,23 +159,9 @@ for (d in 1:D){
 Pseudo_norm_var50 <- (as.matrix(Pseudo_count)/10000) + Pseudo_error_50
 Pseudo_norm_var50[Pseudo_norm_var50 <= 0.001 ] = 0.001
 Y0_var50 <- Pseudo_norm_var50
-N = ncol(Y0_var50)
-W_tilde <- SAME_Input$W_tilde
-mcmc_samples_theta1 = 100
-Lambda = c(0:mcmc_samples_theta1)
-c_k <- SAME_Input$c_k
-YSG <- sg.list
-T <- SAME_Input$T
-K <- SAME_Input$K
-D <- SAME_Input$D
-
-##run SAME to get w_hat_t0
-#rst <- SAME(Y0, X, W_tilde,
-#            mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1 )
-
-#plot(z_est_200,true_z, xlab = 'estmation',ylab='true', main = 'Z')
 
 
+##run SAME 
 rst_var50_alpha1 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
 rst_var50_alpha0 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =0)
 rst_var50_alpha0.5 <- SAME(Y0_var50, X, W_tilde, mcmc_samples_theta1, Lambda, c_k, YSG, alpha =0.5)
