@@ -116,6 +116,7 @@ SAME <- function(Y0, X, W_tilde,
     
     print(table(gamma_est[[k-1]]))
     
+    
     ## Step 2: Update theta1 for one time
     tau_e_same <- matrix(tau_e_est[(start_idx+1):(end_idx+1),], nrow = D, ncol = Lambdai)
     alpha_same <- matrix(alpha_unif_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)

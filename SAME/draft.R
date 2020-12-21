@@ -61,4 +61,6 @@ tau_e = 100
 W = (1 - alpha)*(true_w_sc[[1]]) + alpha*(W_tilde)
     e <- matrix(rnorm(D*N, 0, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
     e[e < 0] = 0.001
-    Y = W %*% Z + e                      
+    Y = W %*% Z + e
+
+### finding out why cannot compete music

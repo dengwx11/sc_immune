@@ -129,6 +129,9 @@ simulate_X <- function(D, K, w_output, T){
       for (d in 1:D){
         for (i in start_idx:end_idx){ ### please check here, if wdkt>0, xdkc < 0, should x_dkc = 0.001? or abs(rnorm()), or 0.
           if (w[d,k]>0){
+            if(T==1){
+              w[d,k]=w[d,k]+rnorm(0,1)*rbinom(1,1,0.4)
+            }
             X[[t]]$counts[d,i] = rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))
             if (X[[t]]$counts[d,i]<0){X[[t]]$counts[d,i] = 0.001}
           }else{
