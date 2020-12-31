@@ -1,6 +1,7 @@
 library(Seurat)
 source('SAME/run_same.R')
 source("SAME/Simulation.R")
+source("SAME/platform_batch_correction.R")
 #preprocess scRNA-seq data to get X
 data_preprocessing <- function(data_set_list, # a list of scRNA-seq dataset, and the first item is t0 tissue. All the items are Seurat object.
                                 CL = "SAME_celltype", #for HCL data
@@ -206,6 +207,12 @@ for (i in 1:length(coherent.genes)){
 dev.off()
 
 
+#### Run batch correction ####
+N <- ncol(Y0)
 
+#B mode
+Y_adj <- b_batch_correct(w_t0, Y0)
 
-
+#S mode
+W_adj <- s_batch_correct(Y0, w_t0, X)
+z_est_adj <- sapply(c(1:N), function(i)nnls(W_adj, Y0[,i]$x))
