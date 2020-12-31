@@ -38,7 +38,7 @@ s_batch_correct <- function(Y0, w_t0, X){
   batch <- c(rep(1, N), rep(2, N))
   Y_combine <- cbind(Y0, Y_star)
   Y_adj <- ComBat(dat = Y_combine, batch = batch)
-  Y_star_adj <- t(Y_adj[,(N+1):(2*N)])
+  Y_star_adj <- t(2^(Y_adj[,(N+1):(2*N)]))
   W_adj <- sapply(c(1:D), function(i)nnls(F_star, Y_star_adj[,i])$x)
   return(t(W_adj))
 }
@@ -52,6 +52,6 @@ b_batch_correct <- function(w_t0, Y0){
   Y_combine <- cbind(Y0, Y)
   batch <- c(rep(1, N), rep(2, N))
   Y_adj <- ComBat(dat = Y_combine, batch = batch)
-  Y0_adj <- Y_adj[,1:N]
+  Y0_adj <- 2^Y_adj[,1:N]
   return(Y0_adj)
 }
