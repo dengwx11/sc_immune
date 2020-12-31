@@ -33,8 +33,13 @@ generate_pseudobulk <- function(X, YSG){
 #This function returns adjusted W  
 s_batch_correct <- function(Y0, w_t0, X){
   N <- ncol(Y0)
-  Y_star <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG)$Y_pseudo)
-  F_star <- t(sapply(c(1:N), function(i) generate_pseudobulk(X, YSG)$prop))
+  rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
+  Y_idx <- seq(1, 2*N, 2)
+  F_idx <- Y_idx + 1
+  Y.list <- rst.list[Y_idx]
+  F.list <- rst.list[F_idx]
+  Y_star <- Reduce(cbind, Y.list)
+  F_star <- t(Reduce(cbind, F.list))
   batch <- c(rep(1, N), rep(2, N))
   Y_combine <- cbind(Y0, Y_star)
   Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch)
