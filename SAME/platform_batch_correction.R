@@ -23,6 +23,7 @@ generate_pseudobulk <- function(X, YSG){
   est_prop <- est_prop/sum(est_prop)
   Y_pseudo <- apply(psb_mat, 1, sum)
   Y_pseudo <- (Y_pseudo/sum(Y_pseudo))*1000000
+  Y_pseudo <- Y_pseudo/10000 #if X in TPM space
   rst$Y_pseudo <- Y_pseudo
   rst$prop <- est_prop
   return(rst)
@@ -31,9 +32,10 @@ generate_pseudobulk <- function(X, YSG){
 
 #S-mode of CibersortX for single-cell batch correction; adjust the signature matrix
 #This function returns adjusted W  
-s_batch_correct <- function(Y0, w_t0, X){
+s_batch_correct <- function(Y0, w_t0, X, YSG){
   N <- ncol(Y0)
   rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
+  Cl <- levels(factor(as.vector(X$Celltype_used)))
   Y_idx <- seq(1, 2*N, 2)
   F_idx <- Y_idx + 1
   Y.list <- rst.list[Y_idx]
@@ -41,10 +43,16 @@ s_batch_correct <- function(Y0, w_t0, X){
   Y_star <- Reduce(cbind, Y.list)
   F_star <- t(Reduce(cbind, F.list))
   batch <- c(rep(1, N), rep(2, N))
-  Y_combine <- cbind(Y0, Y_star)
-  Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch)
-  Y_star_adj <- t(2^(Y_adj[,(N+1):(2*N)]))
+  gene.list <- intersect(rownames(Y0), YSG)
+  Y_combine <- cbind(Y0[gene.list,], Y_star[gene.list,])
+  Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch
+                    #par.prior = FALSE, mean.only = TRUE
+                    )
+  Y_star_adj <- t(2^(Y_adj[,(N+1):(2*N)])-1)
   W_adj <- sapply(c(1:D), function(i)nnls(F_star, Y_star_adj[,i])$x)
+  W_adj = t(W_adj)
+  rownames(W_adj) <- gene.list
+  colnames(W_adj) <- Cl
   return(t(W_adj))
 }
 
@@ -52,9 +60,10 @@ s_batch_correct <- function(Y0, w_t0, X){
 #This function returns adjusted Y0
 b_batch_correct <- function(w_t0, Y0){
   N <- ncol(Y0)
-  z_initial <- sapply(c(1:N), function(i) nnls(w_t0, Y0[,i])$x)
-  Y <- w_t0 %*% z_initial
-  Y_combine <- cbind(Y0, Y)
+  gene.list <- intersect(rownames(w_t0), rownames(Y0))
+  z_initial <- sapply(c(1:N), function(i) nnls(w_t0[gene.list,], Y0[gene.list,i])$x)
+  Y <- w_t0[gene.list,] %*% z_initial
+  Y_combine <- cbind(Y0[gene.list,], Y)
   batch <- c(rep(1, N), rep(2, N))
   Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch)
   Y0_adj <- (2^Y_adj[,1:N])-1
