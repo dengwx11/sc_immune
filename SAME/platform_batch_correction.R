@@ -56,6 +56,32 @@ s_batch_correct <- function(Y0, w_t0, X, YSG){
   return(t(W_adj))
 }
 
+#adjust Y0 by pseudo bulk from single cell reference
+Y0_batch_correct <- function(Y0, w_t0, X, YSG){
+  N <- ncol(Y0)
+  rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
+  Cl <- levels(factor(as.vector(X$Celltype_used)))
+  Y_idx <- seq(1, 2*N, 2)
+  F_idx <- Y_idx + 1
+  Y.list <- rst.list[Y_idx]
+  F.list <- rst.list[F_idx]
+  Y_star <- Reduce(cbind, Y.list)
+  F_star <- t(Reduce(cbind, F.list))
+  batch <- c(rep(1, N), rep(2, N))
+  gene.list <- intersect(rownames(Y0), YSG)
+  Y_combine <- cbind(Y0[gene.list,], Y_star[gene.list,])
+  Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch
+                    #par.prior = FALSE, mean.only = TRUE
+                    )
+#   Y_star_adj <- t(2^(Y_adj[,(N+1):(2*N)])-1)
+  Y0_adj <- t(2^(Y_adj[,1:N])-1)
+#   W_adj <- sapply(c(1:D), function(i)nnls(F_star, Y_star_adj[,i])$x)
+#   W_adj = t(W_adj)
+#   rownames(W_adj) <- gene.list
+#   colnames(W_adj) <- Cl
+  return(Y0_adj)
+}
+
 #B-mode of CibersortX for single-cell batch correction; adjust the bulk profile 
 #This function returns adjusted Y0
 b_batch_correct <- function(w_t0, Y0){
