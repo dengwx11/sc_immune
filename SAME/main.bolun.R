@@ -208,11 +208,29 @@ dev.off()
 
 
 #### Run batch correction ####
+X <- readRDS("./CibersortX/Fig2ab-NSCLC_PBMCs/NSCLC_seur.rds")
+Y0 <- read.table("./CibersortX/Fig2ab-NSCLC_PBMCs/Fig2b-WholeBlood_RNAseq.txt", header = T, row.names = 1)
+w_t0 <- read.table("./CibersortX/Fig2ab-NSCLC_PBMCs/Fig2ab-NSCLC_PBMCs_scRNAseq_sigmatrix.txt", header = T, row.names = 1, sep = "\t")
 N <- ncol(Y0)
-
-#B mode
-Y_adj <- b_batch_correct(w_t0, Y0)
+YSG <- rownames(w_t0)
+# #B mode
+# Y_adj <- b_batch_correct(w_t0, Y0)
 
 #S mode
-W_adj <- s_batch_correct(Y0, w_t0, X)
+W_adj <- s_batch_correct(Y0, w_t0, X, YSG)
 z_est_adj <- sapply(c(1:N), function(i)nnls(W_adj, Y0[,i]$x))
+
+#adjust Y0
+Y0_adj <- Y0_batch_correct(Y0, NSCLC_seur, YSG)
+
+#adjust Y
+rst <- Y_batch_correct(Y0, NSCLC_seur, YSG)
+pca_input <- rst$before
+# pca_input <- rst$after
+batch <- c(rep(1, N), rep(2, N))
+pca_input <- as.data.frame(t(pca_input))
+pca_rst<-prcomp(pca_input, scale. = T)
+ggbiplot(pca_rst, obs.scale = 1, var.scale = 1,
+         groups = as.factor(batch), ellipse = T, circle = T, var.axes = F) + 
+         scale_color_discrete(name = '') +
+         theme_bw()+ ggtitle("Before")

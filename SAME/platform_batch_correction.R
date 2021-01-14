@@ -2,7 +2,7 @@ library(nnls)
 library(sva)
 set.seed(2020)
 #generate pseudo bulk from single cell dataset, and return a result list of TPM pseudo bulk and cell type proprtion
-generate_pseudobulk <- function(X, YSG){
+generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
   rst <- list()
   Cl <- levels(factor(as.vector(X$Celltype_used)))
   est_prop <- rep(0, length(Cl))
@@ -32,7 +32,7 @@ generate_pseudobulk <- function(X, YSG){
 
 #S-mode of CibersortX for single-cell batch correction; adjust the signature matrix
 #This function returns adjusted W  
-s_batch_correct <- function(Y0, w_t0, X, YSG){
+s_batch_correct <- function(Y0, w_t0, X, YSG, Celltype_used = "Celltype_used"){
   N <- ncol(Y0)
   rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
   Cl <- levels(factor(as.vector(X$Celltype_used)))
@@ -57,7 +57,7 @@ s_batch_correct <- function(Y0, w_t0, X, YSG){
 }
 
 #adjust Y0 by pseudo bulk from single cell reference
-Y0_batch_correct <- function(Y0, w_t0, X, YSG){
+Y0_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
   N <- ncol(Y0)
   rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
   Cl <- levels(factor(as.vector(X$Celltype_used)))
@@ -74,11 +74,15 @@ Y0_batch_correct <- function(Y0, w_t0, X, YSG){
                     #par.prior = FALSE, mean.only = TRUE
                     )
 #   Y_star_adj <- t(2^(Y_adj[,(N+1):(2*N)])-1)
-  Y0_adj <- t(2^(Y_adj[,1:N])-1)
 #   W_adj <- sapply(c(1:D), function(i)nnls(F_star, Y_star_adj[,i])$x)
 #   W_adj = t(W_adj)
 #   rownames(W_adj) <- gene.list
 #   colnames(W_adj) <- Cl
+  Y0_adj <- 2^(Y_adj[,1:N])-1
+  # rst <- list()
+  # rst$before <- Y_combine 
+  # rst$after <- Y_adj #Y0_adj = Y_adj[1:N, ]
+  # return(rst)
   return(Y0_adj)
 }
 
@@ -94,4 +98,28 @@ b_batch_correct <- function(w_t0, Y0){
   Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch)
   Y0_adj <- (2^Y_adj[,1:N])-1
   return(Y0_adj)
+}
+
+
+#adjust Y0 by pseudo bulk from single cell reference
+Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
+  N <- ncol(Y0)
+  rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
+  Cl <- levels(factor(as.vector(X$Celltype_used)))
+  Y_idx <- seq(1, 2*N, 2)
+  F_idx <- Y_idx + 1
+  Y.list <- rst.list[Y_idx]
+  F.list <- rst.list[F_idx]
+  Y_star <- Reduce(cbind, Y.list)
+  F_star <- t(Reduce(cbind, F.list))
+  batch <- c(rep(1, N), rep(2, N))
+  gene.list <- intersect(rownames(Y0), YSG)
+  Y_combine <- cbind(Y0[gene.list,], Y_star[gene.list,])
+  Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch
+                    #par.prior = FALSE, mean.only = TRUE
+                    )
+  rst <- list()
+  rst$before <- Y_combine 
+  rst$after <- Y_adj #Y0_adj = Y_adj[1:N, ]
+  return(rst)
 }
