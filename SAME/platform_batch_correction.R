@@ -1,3 +1,4 @@
+source("SAME/ComBat_sc.R")
 library(nnls)
 library(sva)
 set.seed(2020)
@@ -35,7 +36,7 @@ generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
 s_batch_correct <- function(Y0, w_t0, X, YSG, Celltype_used = "Celltype_used"){
   N <- ncol(Y0)
   rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
-  Cl <- levels(factor(as.vector(X$Celltype_used)))
+  Cl <- levels(factor(as.vector(X[[Celltype_used]])))
   Y_idx <- seq(1, 2*N, 2)
   F_idx <- Y_idx + 1
   Y.list <- rst.list[Y_idx]
@@ -105,7 +106,7 @@ b_batch_correct <- function(w_t0, Y0){
 Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
   N <- ncol(Y0)
   rst.list <- sapply(c(1:N), function(i) generate_pseudobulk(X, YSG))
-  Cl <- levels(factor(as.vector(X$Celltype_used)))
+  Cl <- levels(factor(as.vector(X[[Celltype_used]])))
   Y_idx <- seq(1, 2*N, 2)
   F_idx <- Y_idx + 1
   Y.list <- rst.list[Y_idx]
@@ -115,11 +116,12 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
   batch <- c(rep(1, N), rep(2, N))
   gene.list <- intersect(rownames(Y0), YSG)
   Y_combine <- cbind(Y0[gene.list,], Y_star[gene.list,])
-  Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch
-                    #par.prior = FALSE, mean.only = TRUE
-                    )
-  rst <- list()
-  rst$before <- Y_combine 
-  rst$after <- Y_adj #Y0_adj = Y_adj[1:N, ]
+  # Y_adj <- ComBat(dat = log2(Y_combine+1), batch = batch)
+  # rst <- list()
+  # rst$before <- Y_combine 
+  # rst$after <- (2^Y_adj)-1 #Y0_adj = Y_adj[1:N, ]
+  rst <- ComBat_sc(dat = as.matrix(log2(Y_combine+1)), batch = batch)
+  rst$bulk_to_sc <- (2^rst$bulk_to_sc)
+  rst$before <- Y_combine
   return(rst)
 }
