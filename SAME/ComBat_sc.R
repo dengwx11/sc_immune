@@ -20,6 +20,27 @@
 
 ComBat_sc <- function(dat, batch, to.sc = TRUE, mod=NULL, par.prior=TRUE,prior.plots=FALSE,mean.only=FALSE) {
   # make batch a factor and make a set of indicators for batch
+  dat <- as.matrix(dat)
+  batch <- as.factor(batch)
+  zero.rows.lst <- lapply(levels(batch), function(batch_level) {
+    if (sum(batch == batch_level) > 1) {
+      return(which(apply(dat[, batch == batch_level], 1, 
+                         function(x) {
+                           var(x) == 0
+                         })))
+    }
+    else {
+      return(which(rep(1, 3) == 2))
+    }
+  })
+  zero.rows <- Reduce(union, zero.rows.lst)
+  keep.rows <- setdiff(1:nrow(dat), zero.rows)
+  if (length(zero.rows) > 0) {
+    cat(sprintf("Found %d genes with uniform expression within a single batch (all zeros); these will not be adjusted for batch.\n", 
+                length(zero.rows)))
+    dat.orig <- dat
+    dat <- dat[keep.rows, ]
+  }
   if(mean.only==TRUE){cat("Using the 'mean only' version of ComBat\n")}
   if(length(dim(batch))>1){stop("This version of ComBat only allows one batch variable")}  ## to be updated soon!
   batch <- as.factor(batch)
@@ -154,12 +175,17 @@ ComBat_sc <- function(dat, batch, to.sc = TRUE, mod=NULL, par.prior=TRUE,prior.p
     cat("Adjusting the Data to single cell space\n")
     rst <- list()
     i <- batches[[1]]
-    bayesdata <- ((s.data[,i]-t(batch.design[i,]%*%gamma.star))*(sqrt(delta.star[2,])%*%t(rep(1,n.batches[2]))))/(sqrt(delta.star[1,])%*%t(rep(1,n.batches[1])))
+    bayesdata <- ((s.data[,i]-t(batch.design[i,]%*%gamma.star))*(sqrt(delta.star[2,])%*%t(rep(1,n.batches[1]))))/(sqrt(delta.star[1,])%*%t(rep(1,n.batches[1])))
     stand.mean <- stand.mean[,i]
     i <- batches[[2]]
-    bayesdata <- (bayesdata*(sqrt(var.pooled)%*%t(rep(1,n.batches[1])))) + t(batch.design[i,]%*%gamma.star) + stand.mean
+    bayesdata <- (bayesdata*(sqrt(var.pooled)%*%t(rep(1,n.batches[1])))) + t(batch.design[i,]%*%gamma.star)[,1:n.batches[1]] + stand.mean
     rst$bulk_to_sc <- bayesdata
     rst$tau_e <- 1/(delta.star[2,]*var.pooled)
+  }
+  if (length(zero.rows) > 0) {
+    dat.orig[keep.rows, 1:n.batches[1]] <- bayesdata
+    bayesdata <- dat.orig[, 1:n.batches[1]]
+    rst$bulk_to_sc <- bayesdata
   }
   
   return(rst)
