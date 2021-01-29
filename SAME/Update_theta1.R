@@ -99,6 +99,8 @@ update_w <- function(Y0, X_mat, W_tilde,
         }
     }
 
+    wt_new <- wt_new * (wt_new>0)
+
     w_new[[t]] <- wt_new
 
   }

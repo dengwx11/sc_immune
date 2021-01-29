@@ -13,18 +13,18 @@ library(Seurat)
 generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
     w_sim_output <- simulate_sigmat_w(Iteration, D, K, pi_ber, T)
     Z <- generate_z(K, N)
-    X_sim_output_original <- simulate_X(D, K, w_sim_output, T)
+    X_sim_output <- simulate_X(D, K, w_sim_output, T,corrupt_pi)
     
 
 
     Y <- simulate_y(w_sim_output, X_sim_output_original[[1]], Z, D, N)
 
-    if(corrupt_pi>0) {
-        X_sim_output <- corrupt_X(X_sim_output_original, corrupt_pi)
+    # if(corrupt_pi>0) {
+    #     X_sim_output <- corrupt_X(X_sim_output_original, corrupt_pi)
         
-    }else{
-        X_sim_output <- X_sim_output_original
-    }
+    # }else{
+    #     X_sim_output <- X_sim_output_original
+    # }
 
     X<-list()
     for(i in 1:T){
@@ -40,7 +40,7 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
     same_input$T = T
     same_input$K = K
     same_input$D = D
-    same_input$X_original <- X_sim_output_original
+    # same_input$X_original <- X_sim_output_original
     same_input$true_Z = Z
     same_input$true_w =  w_sim_output
 

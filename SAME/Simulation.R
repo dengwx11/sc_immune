@@ -12,7 +12,7 @@
 #}
 
 #generate v
-generate_v <- function(D, K, mu=1, tau=4){
+generate_v <- function(D, K, mu=2, tau=4){
   v <- matrix(abs(rnorm(D*K, mu, sd = (1/sqrt(tau)))), nrow = D, ncol = K)
   return(v)
 }
@@ -30,13 +30,12 @@ generate_w <- function(v, gamma,D, K, tau_w=tau_w_para
   w <- matrix(0, nrow = D, ncol = K)
   for (d in 1:D){
     for (k in 1:K){
-      w[d,k] = rnorm(1, v[d,k], sd = (1/sqrt(tau_w)))
-      if (w[d,k]<0){w[d,k]=0}
+      w[d,k] = max(rnorm(1, v[d,k]*gamma[d,k], sd = (1/sqrt(tau_w))),0.001)
     }
   }
-  w_new <- w*gamma
+  #w_new <- w*gamma
   #    print(paste("empirical pi=", (1-sum(w_new==0)/length(w_new))))
-  return(w_new)
+  return(w)
 }
 
 #calculate the max cos among cell types
@@ -106,10 +105,11 @@ generate_z <- function(K,N){
 #if wdkt>0, xdkc > 0
 #if wdkt=0, mu=0, tau_xd=5, if x <0 , x =0.001
 #generate X, a list contain read count matrix, cell labels, tau_xd, c_k, w_tilde, and celltype list
-simulate_X <- function(D, K, w_output, T){
+simulate_X <- function(D, K, w_output, T,corrupt_pi){
   
   X <- list()
   tau_xd = rgamma(D, 1, tau_xd_beta_para)
+  gamma <- w_output$gamma
   for(t in 1:T){
     
     X[[t]] <- list()
@@ -127,20 +127,20 @@ simulate_X <- function(D, K, w_output, T){
       start_idx = end_idx + 1
       end_idx = start_idx + c_k[k] - 1
       for (d in 1:D){
-        if(T==1){
-              w[d,k]=w[d,k]+rnorm(0,1)*rbinom(1,1,0.4)
-        }
+        # if(t==1){
+        #     if(gamma[d,k]==1){
+        #       w[d,k]=w[d,k]*rbinom(1,1,1-corrupt_pi)
+        #     }             
+        #   #print(c(w_prev,w[d,k]))
+        # }
+        corrupt_flg <- rbinom(1,1,1-corrupt_pi)
         for (i in start_idx:end_idx){ ### please check here, if wdkt>0, xdkc < 0, should x_dkc = 0.001? or abs(rnorm()), or 0.
-          if (w[d,k]>0){
-              X[[t]]$counts[d,i] = rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))             
-            if (X[[t]]$counts[d,i]<0){X[[t]]$counts[d,i] = 0.001}
-          }else if(w[d,k]<0){
-            X[[t]]$counts[d,i] = abs(rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d])))) ### there is rarely 0 in X
-          }else{
-            X[[t]]$counts[d,i] = 0
+          X[[t]]$counts[d,i] = max(rnorm(1, w[d,k], sd = (1/sqrt(X[[t]]$tau_xd[d]))), 0.001 )
+          if(gamma[d,k]==1){
+            X[[t]]$counts[d,i] = X[[t]]$counts[d,i] * corrupt_flg
           }
         }
-        X[[t]]$w_tilde[d,k] = mean(X[[t]]$counts[d,start_idx:end_idx])
+        X[[t]]$w_tilde[d,k] = mean(X[[t]]$counts[d,start_idx:end_idx])  ## observation
       }
       X[[t]]$Celltype_used[start_idx:end_idx] <- celltype.list[k]
     }
@@ -154,7 +154,8 @@ simulate_X <- function(D, K, w_output, T){
 corrupt_X <- function(X_sim_output, corrupt_pi = 0.2){    
   for(t in 1:T){
     X <- X_sim_output[[t]]
-    corrupt_bin <- matrix(rbinom(sum(X$c_k), 1, 1-corrupt_pi), nrow = 1, ncol = sum(X$c_k))[rep(1,D),]
+    #corrupt_bin <- matrix(rbinom(sum(X$c_k), 1, 1-corrupt_pi), nrow = 1, ncol = sum(X$c_k))[rep(1,D),]
+    corrupt_bin <- matrix(rbinom(sum(X$c_k)*D, 1, 1-corrupt_pi), nrow = D, ncol = sum(X$c_k))
     X$counts <- X$counts * corrupt_bin
     c_k <- X$c_k
     end_idx = 0
@@ -192,7 +193,9 @@ corrupt_X <- function(X_sim_output, corrupt_pi = 0.2){
 #simulate Y
 simulate_y <- function(w_sim_output, X_sim_output, Z, D, N,
                        alpha = 0.5, mu_e = 0, tau_e = 1000){
-  W = (1 - alpha)*(w_sim_output$w[[1]]) + alpha*(X_sim_output$w_tilde)
+  #W = (1 - alpha)*(w_sim_output$w[[1]]) + alpha*(X_sim_output$w_tilde)
+  #W = w_sim_output$w[[1]]
+  W = w_sim_output$v * w_sim_output$gamma
   e <- matrix(rnorm(D*N, mu_e, sd = (1/sqrt(tau_e))), nrow = D, ncol = N)
   e[e < 0] = 0.001
   Y = W %*% Z + e

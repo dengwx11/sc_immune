@@ -23,7 +23,7 @@ generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
   }
   est_prop <- est_prop/sum(est_prop)
   Y_pseudo <- apply(psb_mat, 1, sum)
-  Y_pseudo <- (Y_pseudo/sum(Y_pseudo))*1000000
+  #Y_pseudo <- (Y_pseudo/sum(Y_pseudo))*1000000
   Y_pseudo <- Y_pseudo/10000 #if X in TPM space
   rst$Y_pseudo <- Y_pseudo
   rst$prop <- est_prop
