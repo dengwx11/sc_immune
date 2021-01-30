@@ -35,8 +35,11 @@ YSG <- readRDS("data/NSCLC/sg.list.rds")
 ## Stage I: preprocessing and normalization
 # ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.logTPM, 
 #                                PBMC_HCL = PBMC_seur.logTPM))
+# ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.TPM/100, 
+#                                PBMC_HCL = PBMC_seur.TPM/100))
 ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.TPM/100, 
-                               PBMC_HCL = PBMC_seur.TPM/100))
+                               PBMC_HCL = PBMC_seur.TPM/100,
+                               Lung_HCL = Lung_seur.TPM/100))                               
 ifnb_liger <- normalize(ifnb_liger)
 ifnb_liger <- selectGenes(ifnb_liger)
 ifnb_liger@var.genes <- intersect(YSG,ifnb_liger@var.genes)
@@ -44,7 +47,7 @@ ifnb_liger <- scaleNotCenter(ifnb_liger)
 
 ## Stage II: joint matrix factorization
 ifnb_liger <- optimizeALS(ifnb_liger, k = 20)
-saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC.HCL_TPM.rds")
+saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC_Lung_TPM.rds")
 
 ## Stage III: quantile normalization and joint clustering
 ifnb_liger <- quantile_norm(ifnb_liger)
@@ -53,10 +56,10 @@ ifnb_liger <- louvainCluster(ifnb_liger, resolution = 0.25)
 ## Stage IV: visualization and downstream analysis
 ifnb_liger <- runTSNE(ifnb_liger) 
 ifnb_liger <- runUMAP(ifnb_liger)
-saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC.HCL_TPM.rds")
+saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC_Lung_TPM.rds")
 ifnb_liger <- runTSNE(ifnb_liger,use.raw=TRUE) 
 ifnb_liger <- runUMAP(ifnb_liger,use.raw=TRUE)
-saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC.HCL_TPM_raw.rds")
+saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC_Lung_TPM_raw.rds")
 
 
 
@@ -98,25 +101,42 @@ sum(ifnb_liger@H.norm[3,])
 
 ## batch correction
 WH_NSCLC <- t(ifnb_liger@W)%*%t(ifnb_liger@H.norm[colnames(NSCLC_seur.TPM),])
-WH_NSCLC <- t(ifnb_liger@W)%*%t(ifnb_liger@H$NSCLC)
-#WVH_NSCLC <- (t(ifnb_liger@W)+t(ifnb_liger@V$NSCLC))%*%t(ifnb_liger@H.norm[colnames(NSCLC_seur.TPM),])
-WVH_NSCLC <- (t(ifnb_liger@W)+t(ifnb_liger@V$NSCLC))%*%t(ifnb_liger@H$NSCLC)
+#WH_NSCLC <- t(ifnb_liger@W)%*%t(ifnb_liger@H$NSCLC)
+WVH_NSCLC <- (t(ifnb_liger@W)+t(ifnb_liger@V$NSCLC))%*%t(ifnb_liger@H.norm[colnames(NSCLC_seur.TPM),])
+#WVH_NSCLC <- (t(ifnb_liger@W)+t(ifnb_liger@V$NSCLC))%*%t(ifnb_liger@H$NSCLC)
 mat_NSCLC <- GetAssayData(NSCLC_seur,slot="counts")[ifnb_liger@var.genes,]
 mat_NSCLC <- as.matrix(mat_NSCLC)
 idx.sample <- sample(seq(dim(mat_NSCLC)[1]*dim(mat_NSCLC)[2]),1000)
-plot(as.vector(WVH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample])
-plot(as.vector(WH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample])
+plot(as.vector(WVH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample]/100)
+plot(as.vector(WH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample]/100)
+
+cor(as.vector(WVH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample]/100)
+cor(as.vector(WH_NSCLC)[idx.sample],as.vector(mat_NSCLC)[idx.sample]/100)
 
 WH_PBMC <- t(ifnb_liger@W)%*%t(ifnb_liger@H.norm[colnames(PBMC_seur.TPM),])
-WH_PBMC <- t(ifnb_liger@W)%*%t(ifnb_liger@H$PBMC_HCL)
+#WH_PBMC <- t(ifnb_liger@W)%*%t(ifnb_liger@H$PBMC_HCL)
 WVH_PBMC<- (t(ifnb_liger@W)+t(ifnb_liger@V$PBMC_HCL))%*%t(ifnb_liger@H.norm[colnames(PBMC_seur.TPM),])
-WVH_PBMC<- (t(ifnb_liger@W)+t(ifnb_liger@V$PBMC_HCL))%*%t(ifnb_liger@H$PBMC_HCL)
+#WVH_PBMC<- (t(ifnb_liger@W)+t(ifnb_liger@V$PBMC_HCL))%*%t(ifnb_liger@H$PBMC_HCL)
 mat_PBMC <- PBMC_seur.TPM[ifnb_liger@var.genes,]
 mat_PBMC <- as.matrix(mat_PBMC)
 idx.sample <- sample(seq(dim(mat_PBMC)[1]*dim(mat_PBMC)[2]),2000)
 plot(as.vector(WVH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
 plot(as.vector(WH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
 
+cor(as.vector(WVH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
+cor(as.vector(WH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
+
+## How are zero expressions corrected on WH
+idx <- which(as.vector(mat_NSCLC)<0.01)
+idx.sample <- sample(seq(length(idx)),1000)
+hist(as.vector(WH_NSCLC)[idx[idx.sample]],100,main="Histogram of WH (corrected expression) when the raw counts<0.01")
+
+idx <- which(as.vector(mat_PBMC)<0.01)
+idx.sample <- sample(seq(length(idx)),1000)
+hist(as.vector(WH_PBMC)[idx[idx.sample]],100,main="Histogram of WH (corrected expression) when the raw counts<0.01")
+
+str(WH_NSCLC)
+str(WH_PBMC)
 
 
 
