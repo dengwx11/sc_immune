@@ -220,6 +220,14 @@ plot_grid(p1, p2)
 NSCLC_seur@assays$RNA@data <- WH_NSCLC
 PBMC_seur@assays$RNA@data <- WH_PBMC
 Lung_seur@assays$RNA@data <- WH_Lung
-saveRDS(NSCLC_seur,"data/NSCLC/NSCLC_seur.rds")
-saveRDS(PBMC_seur,"data/NSCLC/PBMC_seur.rds")
-saveRDS(Lung_seur,"data/NSCLC/Lung_seur.rds")
+
+celltype.list <- c("B", "Monocyte", "NK cell", "T")
+new_PBMC <- subset(new_PBMC, Celltype_used %in% celltype.list)
+set.seed(2021)
+idx.sample <- sample(seq(ncol(new_PBMC)),4000)
+new_PBMC <- subset(new_PBMC, cells=Cells(new_PBMC)[idx.sample])
+new_Lung <- subset(new_Lung, Celltype_used %in% celltype.list)
+saveRDS(new_NSCLC,"data/NSCLC/NSCLC_liger_seur.rds")
+saveRDS(new_PBMC,"data/NSCLC/PBMC_liger_seur.rds")
+saveRDS(new_Lung,"data/NSCLC/Lung_liger_seur.rds")
+
