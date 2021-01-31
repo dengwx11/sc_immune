@@ -115,7 +115,7 @@ update_pi_est <- function(gamma,
 
 #update tau_x
 update_tau_x <- function(X, #X is a list of gene expression matrix from each tissue. For each matrix, cells should be ordered by cell types
-                            W_T,
+                            W_T, Cl,
                             alpha_x = 10^(-6), beta_x = 10^(-6)
                             ){
     #############

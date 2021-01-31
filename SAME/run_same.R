@@ -104,8 +104,8 @@ SAME <- function(Y0, X, W_tilde,
       pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
                                        alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
       )
-      tau_x_est[j+1,] <- update_tau_x(X, 
-                      w_est,
+      tau_x_est[j+1,] <- update_tau_x(X_mat, 
+                      w_est, Cl,
                       alpha_x = alpha_prior_x, beta_x = beta_prior_x
                       )
       tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
