@@ -28,6 +28,8 @@ corrupt_pi =  0.8 ## corruption rate due to shallow sequencing depth
 ########
 set.seed(2021)
 same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi)
+str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para)
+
 
 Y0 = as.matrix(same_input$Y0)
 X = same_input$X  ## seurat type for observed expression profile
@@ -54,6 +56,7 @@ Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 alpha=1
 rst1 <- SAME(Y0, X, W_tilde,
             mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
+
 
 w_est_alpha1 <-  rst1$theta1$w
 est_vg <- lapply(c(1:mcmc_samples_theta1), function(i) rst1$theta2$gamma[[i]] * rst1$theta2$v[[i]])
