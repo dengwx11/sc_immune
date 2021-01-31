@@ -1,5 +1,7 @@
 library(rliger)
 library(Seurat)
+library(umap)
+library(ggplot2)
 set.seed(2021)
 
 ## Data Loading and tramsform to log(TPM+1)
@@ -20,15 +22,36 @@ set.seed(2021)
 NSCLC_seur <- readRDS("data/NSCLC/NSCLC_seur.rds") ## TPM
 NSCLC_seur[['RNA']]@data <- log1p(NSCLC_seur[['RNA']]@counts)
 NSCLC_seur.TPM <- GetAssayData(NSCLC_seur[['RNA']],slot='counts')
+NSCLC_seur <- NormalizeData(NSCLC_seur)
+NSCLC_seur <- FindVariableFeatures(NSCLC_seur, selection.method = "vst", nfeatures = 500)
+NSCLC_seur <- ScaleData(NSCLC_seur)
+NSCLC_seur<- RunPCA(NSCLC_seur, verbose = FALSE)
+NSCLC_seur <- FindNeighbors(NSCLC_seur, dims = 1:25)
+NSCLC_seur <- FindClusters(NSCLC_seur, resolution = 0.8)
+NSCLC_seur <- RunUMAP(NSCLC_seur, dims = 1:50)
 
 PBMC_seur <- readRDS("data/NSCLC/PBMC_ImmuneCell_updated.rds") ## counts
 PBMC_seur <- NormalizeData(PBMC_seur,normalization.method = "LogNormalize",scale.factor = 1000000)
 PBMC_seur.TPM <- exp(GetAssayData(PBMC_seur[['RNA']],slot='data'))-1
+PBMC_seur <- NormalizeData(PBMC_seur)
+PBMC_seur <- FindVariableFeatures(PBMC_seur, selection.method = "vst", nfeatures = 500)
+PBMC_seur <- ScaleData(PBMC_seur)
+PBMC_seur<- RunPCA(PBMC_seur, verbose = FALSE)
+PBMC_seur <- FindNeighbors(PBMC_seur, dims = 1:25)
+PBMC_seur <- FindClusters(PBMC_seur, resolution = 0.8)
+PBMC_seur <- RunUMAP(PBMC_seur, dims = 1:50)
 
 
 Lung_seur <- readRDS("data/NSCLC/Lung_ImmuneCell_updated.rds") ## counts
 Lung_seur <- NormalizeData(Lung_seur,normalization.method = "LogNormalize",scale.factor = 1000000)
 Lung_seur.TPM <- exp(GetAssayData(Lung_seur[['RNA']],slot='data'))-1
+Lung_seur <- NormalizeData(Lung_seur)
+Lung_seur <- FindVariableFeatures(Lung_seur, selection.method = "vst", nfeatures = 500)
+Lung_seur <- ScaleData(Lung_seur)
+Lung_seur<- RunPCA(Lung_seur, verbose = FALSE)
+Lung_seur <- FindNeighbors(Lung_seur, dims = 1:25)
+Lung_seur <- FindClusters(Lung_seur, resolution = 0.8)
+Lung_seur <- RunUMAP(Lung_seur, dims = 1:50)
 
 YSG <- readRDS("data/NSCLC/sg.list.rds")
 
@@ -64,7 +87,7 @@ saveRDS(ifnb_liger,"write/liger/NSCLC_PBMC_Lung_TPM_raw.rds")
 
 
 ## Stage IV: visualization and downstream analysis
-ifnb_liger <- readRDS("write/liger/NSCLC_PBMC.HCL_TPM.rds")
+ifnb_liger <- readRDS("write/liger/NSCLC_PBMC_Lung_TPM.rds")
 p <- plotByDatasetAndCluster(ifnb_liger, return.plots = T)
 plot_grid(p[[1]], p[[2]])
 
@@ -83,7 +106,7 @@ plotGene(ifnb_liger, "PTPRC")
 plotClusterProportions(ifnb_liger)
 plotClusterFactors(ifnb_liger, use.aligned = T)
 
-mydir = "plots/liger/NSCLC_PBMC.HCL_"
+mydir = "plots/liger/NSCLC_PBMC_Lung_"
 pdf(paste0(mydir, "word_clouds.pdf"))
 plotWordClouds(ifnb_liger, dataset1 = "NSCLC", dataset2 = "PBMC_HCL")
 dev.off()
@@ -96,8 +119,7 @@ markers <- getFactorMarkers(ifnb_liger, dataset1 = "NSCLC", dataset2 = "PBMC_HCL
 plotGene(ifnb_liger, gene = "CD14")
 plotGeneViolin(ifnb_liger, gene = "CD14")
 
-cbind(ifnb_liger@H.norm[1:10,1],ifnb_liger@H$NSCLC[1:10,1])
-sum(ifnb_liger@H.norm[3,])
+
 
 ## batch correction
 WH_NSCLC <- t(ifnb_liger@W)%*%t(ifnb_liger@H.norm[colnames(NSCLC_seur.TPM),])
@@ -126,6 +148,19 @@ plot(as.vector(WH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
 cor(as.vector(WVH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
 cor(as.vector(WH_PBMC)[idx.sample],as.vector(mat_PBMC)[idx.sample])
 
+WH_Lung <- t(ifnb_liger@W)%*%t(ifnb_liger@H.norm[colnames(Lung_seur.TPM),])
+#WH_PBMC <- t(ifnb_liger@W)%*%t(ifnb_liger@H$PBMC_HCL)
+WVH_Lung<- (t(ifnb_liger@W)+t(ifnb_liger@V$Lung_HCL))%*%t(ifnb_liger@H.norm[colnames(Lung_seur.TPM),])
+#WVH_PBMC<- (t(ifnb_liger@W)+t(ifnb_liger@V$PBMC_HCL))%*%t(ifnb_liger@H$PBMC_HCL)
+mat_Lung <- Lung_seur.TPM[ifnb_liger@var.genes,]
+mat_Lung <- as.matrix(mat_Lung)
+idx.sample <- sample(seq(dim(mat_Lung)[1]*dim(mat_Lung)[2]),2000)
+plot(as.vector(WVH_Lung)[idx.sample],as.vector(mat_Lung)[idx.sample])
+plot(as.vector(WH_Lung)[idx.sample],as.vector(mat_Lung)[idx.sample])
+
+cor(as.vector(WVH_Lung)[idx.sample],as.vector(mat_Lung)[idx.sample])
+cor(as.vector(WH_Lung)[idx.sample],as.vector(mat_Lung)[idx.sample])
+
 ## How are zero expressions corrected on WH
 idx <- which(as.vector(mat_NSCLC)<0.01)
 idx.sample <- sample(seq(length(idx)),1000)
@@ -135,11 +170,56 @@ idx <- which(as.vector(mat_PBMC)<0.01)
 idx.sample <- sample(seq(length(idx)),1000)
 hist(as.vector(WH_PBMC)[idx[idx.sample]],100,main="Histogram of WH (corrected expression) when the raw counts<0.01")
 
-str(WH_NSCLC)
-str(WH_PBMC)
+## visualization on W*H.norm
+new_mat <- cbind(WH_NSCLC,WH_PBMC,WH_Lung)
+Celltype_used <-  c(as.character(NSCLC_seur$Celltype_used), 
+            as.character(PBMC_seur$Celltype_used), 
+            as.character(Lung_seur$Celltype_used))
+Batch <- c(rep("NSCLC",ncol(NSCLC_seur)),rep("PBMC_HCL",ncol(PBMC_seur)),rep("Lung_HCL",ncol(Lung_seur)))
+new_seur <- CreateSeuratObject(new_mat)
+new_seur$Celltype_used <- Celltype_used
+new_seur$Batch <- Batch
+
+## umap visualization
+# standard log-normalization
+new_seur <- NormalizeData(new_seur)
+new_seur@assays$RNA@data <- new_seur@assays$RNA@counts
+# choose ~1k variable features
+new_seur <- FindVariableFeatures(new_seur, selection.method = "vst", nfeatures = 500)
+# standard scaling (no regression)
+new_seur <- ScaleData(new_seur)
+# Run PCA, select 13 PCs for tSNE visualization and graph-based clustering
+new_seur<- RunPCA(new_seur, verbose = FALSE)
+
+new_seur <- FindNeighbors(new_seur, dims = 1:25)
+new_seur <- FindClusters(new_seur, resolution = 0.8)
+new_seur <- RunUMAP(new_seur, dims = 1:50)
+DimPlot(new_seur,group.by = 'Batch')
+DimPlot(new_seur,group.by = 'Celltype_used')
+saveRDS(new_seur,'write/liger/BatchCorrected_NSCLC_PBMC_Lung_seur.rds')
 
 
+new_split <- SplitObject(new_seur,split.by = 'Batch')
+new_NSCLC <- new_split[['NSCLC']]
+new_PBMC <- new_split[['PBMC_HCL']]
+new_Lung <- new_split[['Lung_HCL']]
 
+p1 <- DimPlot( new_NSCLC , group.by='Celltype_used')+ ggtitle("NSCLC, Batch Corrected")
+p2 <- DimPlot( NSCLC_seur , group.by='Celltype_used')+ ggtitle("NSCLC, Raw")
+plot_grid(p1, p2)
 
+p1 <- DimPlot( new_PBMC , group.by='Celltype_used') + ggtitle("PBMC HCL, Batch Corrected")
+p2 <- DimPlot( PBMC_seur , group.by='Celltype_used') + ggtitle("PBMC HCL, Raw")
+plot_grid(p1, p2)
 
+p1 <- DimPlot( new_Lung , group.by='Celltype_used') + ggtitle("Lung HCL, Batch Corrected")
+p2 <- DimPlot( Lung_seur , group.by='Celltype_used') + ggtitle("Lung HCL, Raw")
+plot_grid(p1, p2)
 
+## save corrected and normalized data in Seurat Object data slot
+NSCLC_seur@assays$RNA@data <- WH_NSCLC
+PBMC_seur@assays$RNA@data <- WH_PBMC
+Lung_seur@assays$RNA@data <- WH_Lung
+saveRDS(NSCLC_seur,"data/NSCLC/NSCLC_seur.rds")
+saveRDS(PBMC_seur,"data/NSCLC/PBMC_seur.rds")
+saveRDS(Lung_seur,"data/NSCLC/Lung_seur.rds")

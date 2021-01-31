@@ -53,9 +53,9 @@ SAME <- function(Y0, X, W_tilde,
   
   pi_ber_est <- matrix(0.3, nrow =  mcmc_samples_theta2+1, ncol = 1)
   pi_ber_est[1] <- 0.3
-  #tau_x_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
-  #tau_x_est[1,] <- 1
-  tau_x_est <- matrix(raw_X[[1]]$tau_xd, nrow =  1, ncol = D)[rep(1,mcmc_samples_theta2+1),]
+  tau_x_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
+  tau_x_est[1,] <- 1
+  #tau_x_est <- matrix(raw_X[[1]]$tau_xd, nrow =  1, ncol = D)[rep(1,mcmc_samples_theta2+1),]
   tau_w_est <- matrix(0, nrow =  mcmc_samples_theta2+1, ncol = 1)
   tau_w_est[1] <- 10
   
@@ -104,10 +104,10 @@ SAME <- function(Y0, X, W_tilde,
       pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
                                        alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
       )
-      # tau_x_est[j+1,] <- update_tau_x(X, 
-      #                 w_est,
-      #                 alpha_x = alpha_prior_x, beta_x = beta_prior_x
-      #                 )
+      tau_x_est[j+1,] <- update_tau_x(X, 
+                      w_est,
+                      alpha_x = alpha_prior_x, beta_x = beta_prior_x
+                      )
       tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
                                      alpha_w = alpha_prior_w, beta_w = beta_prior_w
       )                
