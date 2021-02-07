@@ -4,13 +4,14 @@ args = commandArgs(trailingOnly=TRUE)
 T <- as.numeric(args[1])
 D <- as.numeric(args[2])
 K <- as.numeric(args[3])
-alpha <- as.numeric(args[4])
+alpha <- as.numeric(args[4]) 
 corrupt_pi <- as.numeric(args[5])
 tau_w_para <- as.numeric(args[6])
 tau_xd_beta_para <- as.numeric(args[7])
+mcmc_samples_theta1 <- as.numeric(args[8])
+seed <- as.integer(args[9])
 
-
-set.seed(2021)
+set.seed(seed)
 library(nnls)
 library(MuSiC)
 library(xbioc)
@@ -62,13 +63,38 @@ true_gamma = same_input$true_w$gamma
 cbind(true_v*true_gamma[,1],true_w[[1]][,1],raw_X[[1]]$w_tilde[,1],true_w[[2]][,1],raw_X[[2]]$w_tilde[,1],W_tilde[,1])
 
 # Starting values
-mcmc_samples_theta1 = 100
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 
 alpha=1
 rst1 <- SAME(Y0, X, W_tilde,
             mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
+
+##### music ####
+assaycounts <- raw_X[[1]]$counts
+rownames(assaycounts) <- paste0('Gene',c(1:D))
+colnames(assaycounts) <- paste0('Cell',c(1:ncol(assaycounts)))
+pheno <- X[[1]]@meta.data
+pheno$SampleID <- paste0('Cell',c(1:ncol(assaycounts)))
+rownames(pheno) <- paste0('Cell',c(1:ncol(assaycounts)))
+sc.eset <- ExpressionSet(assayData = assaycounts, phenoData = as(data.frame(pheno),"AnnotatedDataFrame"))
+assaycounts <- Y0
+rownames(assaycounts) <- paste0('Gene',c(1:D))
+colnames(assaycounts) <- paste0('ID',c(1:N))
+pheno <- data.frame('subjectID' = paste0('ID',c(1:N)))
+rownames(pheno) <- paste0('ID',c(1:N))
+bulk.eset <- ExpressionSet(assayData = assaycounts, phenoData = as(data.frame(pheno),"AnnotatedDataFrame"))
+# Estimate cell type proportions
+Est.prop = music_prop(bulk.eset = bulk.eset, sc.eset = sc.eset, clusters = 'Celltype_used',
+                               samples = 'SampleID',  verbose = F)
+names(Est.prop)
+z_est_music <- t(Est.prop$Est.prop.weighted)
+z_est_nnls <- t(Est.prop$Est.prop.allgene)
+
+
+rst <- list()
 rst$same_rst <- rst1
 rst$same_input <- same_input
+rst$music <- z_est_music
+rst$nnls_music <- z_est_nnls
 mydir <- "/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/simulation_rst/"            
 saveRDS(rst,paste0(mydir,"rst.alpha=",alpha,'.',str_para,'.rds'))
