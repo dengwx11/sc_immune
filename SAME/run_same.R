@@ -80,10 +80,13 @@ SAME <- function(Y0, X, W_tilde,
     j = start_idx ## for debugging
     
     for(j in start_idx:end_idx){
+      
       tau_e_est[j+1,] <- update_tau_e(Y0, W_tilde, # input
                                       alpha_unif_est[j], w_est[[1]], z_est, # est
                                       alpha_e = alpha_prior_e, beta_e = beta_prior_e # noninformative prior
       )
+      
+      
       #alpha_unif_est[j+1,] <- update_alpha_unif(Y0, W_tilde,
       #                    w_est[[1]], z_est, tau_e_est[j+1,]
       #                    )
@@ -101,16 +104,21 @@ SAME <- function(Y0, X, W_tilde,
       v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                            tau_v=tau_v
       )
+
+        
       pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
                                        alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
       )
+      
       tau_x_est[j+1,] <- update_tau_x(X_mat, 
                       w_est, Cl,
                       alpha_x = alpha_prior_x, beta_x = beta_prior_x
                       )
+                       
       tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
                                      alpha_w = alpha_prior_w, beta_w = beta_prior_w
-      )                
+      )   
+                
       k=k+1
     }
     
