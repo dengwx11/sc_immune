@@ -3,15 +3,15 @@ sum(NSCLC_seur@assays$RNA@counts[,1])
 cancer_mat <- as.matrix(NSCLC_seur@assays$RNA@counts)
 sum(cancer_mat[,1])
 N1 <- ncol(cancer_mat)
-"/home/lbl/Mydata/YaleProject/mca/MCA/rmbatch_dge/PeripheralBlood*"
-PBMC_ImmuneCell_updated <- readRDS("/data4/lbl/Yale/HCL/protein_coding/PBMC_ImmuneCell_updated.rds")
+
+PBMC_ImmuneCell_updated <- readRDS("/data/PBMC_ImmuneCell_updated.rds")
 #check PBMC and normalize raw counts to TPM space
 PBMC_ImmuneCell_updated <- NormalizeData(PBMC_ImmuneCell_updated, scale.factor = 1000000)
 sum(PBMC_ImmuneCell_updated@assays$RNA@counts[,1]) #4616 counts for the first cell
 sum(expm1(PBMC_ImmuneCell_updated@assays$RNA@data[,1])) #1e+06
 hcl_mat <- expm1(as.matrix(PBMC_ImmuneCell_updated@assays$RNA@data))
 # PBMC_ImmuneCell_updated[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
-PBMC_ImmuneCell_updated[["TPM"]] <- CreateAssayObject(data = log1p(hcl_mat))
+# PBMC_ImmuneCell_updated[["TPM"]] <- CreateAssayObject(data = log1p(hcl_mat))
 sum(hcl_mat[,1])#1e+06
 sum(PBMC_ImmuneCell_updated@assays$TPM@data[,1])
 sum(PBMC_ImmuneCell_updated@assays$TPM@counts[,1])
@@ -50,8 +50,8 @@ hcl_mat <- expm1(as.matrix(PBMC_ImmuneCell_updated@assays$RNA@data))
 PBMC_ImmuneCell_updated[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
 sum(PBMC_ImmuneCell_updated@assays$TPM@counts[,1])
 table(CB_ImmuneCell_updated$Celltype_used)
-table(Liver_ImmuneCell_updated$Celltype_used)
-table(Kidney_ImmuneCell_updated$Celltype_used)
+table(Liver_ImmuneCell_updated$Celltype_used) #no monocyte
+table(Kidney_ImmuneCell_updated$Celltype_used) #no monocyte
 table(BM_ImmuneCell_updated$Celltype_used)
 
 NSCLC_seur[["TPM"]] <- CreateAssayObject(counts = 2^(rst$bulk_to_sc))
@@ -114,7 +114,7 @@ for (k in 1:K){
 mcmc_samples_theta1 = 50
 Lambda = c(0:mcmc_samples_theta1)
 #change line 13 code as mat <- X@assays$TPM@counts
-Y0 <- read.table("/data4/lbl/Yale/HCL/Bayesian/CibersortX/Fig2ab-NSCLC_PBMCs/Fig2b-WholeBlood_RNAseq.txt", row.names = 1, header = T, sep = "\t")
+Y0 <- read.table("/data/NSCLC/Fig2b-WholeBlood_RNAseq.txt", row.names = 1, header = T, sep = "\t")
 # rst <- Y_batch_correct(Y0, NSCLC_seur, YSG) # both Y0 and NSCLC_seur in TPM space
 rst <- Y_batch_correct(Y0, X[[1]], YSG)
 Y0_sc <- rst$bulk_to_sc
@@ -129,8 +129,9 @@ rst_sc_alpha1 <- SAME(log1p(Y0_sc), X, log1p(W_tilde), mcmc_samples_theta1, Lamb
 
 # rst_sc_alpha.5<- SAME(log1p(Y0_sc), X, log1p(W_tilde), mcmc_samples_theta1, Lambda, c_k, YSG, alpha =.5)
 
-saveRDS(rst_sc_alpha1, file = "/data4/lbl/Yale/HCL/SAME/wirte/SAME_rst_t4_HCl_cancer_alpha1.rds")
-saveRDS(rst_sc_alpha0, file = "/data4/lbl/Yale/HCL/SAME/wirte/SAME_rst_t3_HCl_cancer_alpha0.rds")
+#check readme.txt for details of the results
+saveRDS(rst_sc_alpha1, file = "/wirte/combat/SAME_rst_t4_HCl_cancer_alpha1.rds")
+saveRDS(rst_sc_alpha0, file = "/wirte/combat/SAME_rst_t3_HCl_cancer_alpha0.rds")
 
 gamma_t2_1 <- Reduce("+", SAME_rst_t2_HCl_cancer_alpha1$theta2$gamma)
 gamma_t2_2 <- Reduce("+", SAME_rst_t2_pi.8_HCl_cancer_alpha1$theta2$gamma)
