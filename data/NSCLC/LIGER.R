@@ -49,13 +49,18 @@ new_Lung <- new_split[['Lung_HCL']]
 X <- list()
 X[[1]] <- subset(new_PBMC, Celltype_used %in% celltype.list)
 X[[2]] <- new_NSCLC
-#X[[3]] <- subset(new_Lung, Celltype_used %in% celltype.list)
+X[[3]] <- subset(new_Lung, Celltype_used %in% celltype.list)
 
 
 Idents(X[[1]]) <- "Celltype_used"
-W_tilde <- as.matrix(AverageExpression(X[[1]],slot='data')$RNA)
+X[[1]] <- NormalizeData(X[[1]])
+W_tilde <- as.matrix(AverageExpression(X[[1]],slot='data')$RNA)/100
 Idents(X[[2]]) <- "Celltype_used"
-W_tilde_2 <- as.matrix(AverageExpression(X[[2]],slot='data')$RNA)
+X[[2]] <- NormalizeData(X[[2]])
+W_tilde_2 <- as.matrix(AverageExpression(X[[2]],slot='data')$RNA)/100
+Idents(X[[3]]) <- "Celltype_used"
+X[[3]] <- NormalizeData(X[[3]])
+W_tilde_3 <- as.matrix(AverageExpression(X[[3]],slot='data')$RNA)/100
 ## SAME
 mcmc_samples_theta1 = 30
 Lambda = c(0:mcmc_samples_theta1)
@@ -74,5 +79,19 @@ w_est_alpha1 <-  rst1$theta1$w
 est_vg <- lapply(c(1:mcmc_samples_theta1), function(i) rst1$theta2$gamma[[i]] * rst1$theta2$v[[i]])
 average_est_vg_1 <- Reduce('+',est_vg)/mcmc_samples_theta1 
 
-cor(average_est_vg_1,W_tilde[,celltype_list])
-plot(average_est_vg_1,W_tilde[,celltype_list])
+celltype.list <- c("B", "Monocyte", "NK cell", "T")
+cor(average_est_vg_1,W_tilde[,celltype.list])
+plot(average_est_vg_1,W_tilde[,celltype.list])
+
+celltype.intersect <- intersect(colnames(W_tilde_2),colnames(W_tilde))
+plot(W_tilde_2[,celltype.intersect],W_tilde_3[,celltype.intersect])
+cor(W_tilde[,celltype.intersect],W_tilde_2[,celltype.intersect])
+
+library(reshape2)
+W_tilde_A <- W_tilde
+W_tilde_B <- W_tilde_3
+celltype.intersect <- intersect(colnames(W_tilde_A),colnames(W_tilde_B))
+df.cor1 <- melt(W_tilde_A[,celltype.intersect],value.name = "PBMC_HCL")
+df.cor2 <- melt(W_tilde_B[,celltype.intersect],value.name = "Lung_HCL")
+df.cor <- cbind(df.cor1,Lung_HCL=df.cor2[,3])
+ggplot(df.cor,aes(x=PBMC_HCL,y=Lung_HCL))+geom_point(aes(colour = factor(Var2)),size=.1)
