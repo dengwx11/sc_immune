@@ -221,3 +221,29 @@ update_tau_w <- function (W_T, v, gamma,
 #     return(rst)
 # }
 
+#empirical gamma based on W_tilde
+update_gamma_empirical <- function(W_tilde, 
+                         W_T, pi_pre, v, tau_w
+){
+    #############
+    #### Input:
+    ## W_tilde: empirical weight matrix, D*K
+    ## W_T: a list of W_hat from each tissue, and the length of the list is T, the dimension of each W_hat is D*K
+    ## pi_pre: estimated pi from the last step. 
+    ## v: D*K
+    #### Output:
+    ## gamma_new: a matrix of Bernoulli variables, D*K
+    #############                                 
+    gamma_new <- matrix(1, nrow = D, ncol = K)
+    para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + 
+        (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
+    for (d in 1:D){
+        for (k in 1:K){
+            if(W_tilde[d,k] == 0){
+                p_temp <- 1/(1+exp(-para[d,k]))
+                gamma_new[d,k] = rbinom(n=1, size = 1, prob = p_temp)
+            }
+        }
+    }
+    return(gamma_new)
+}

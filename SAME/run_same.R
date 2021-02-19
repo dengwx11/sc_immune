@@ -96,10 +96,13 @@ SAME <- function(Y0, X, W_tilde,
       {
         last_v = Lambda[i+1]
       }else {last_v = k-1}
-      gamma_est[[k]] <- update_gamma(W_tilde, 
+      #gamma_est[[k]] <- update_gamma(W_tilde, 
+      #                               w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
+      #)                    
+      #for improving gamma estimation
+      gamma_est[[k]] <- update_gamma_empirical(W_tilde, 
                                      w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
-      )                    
-      
+      )   
       
       v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                            tau_v=tau_v
