@@ -247,3 +247,19 @@ update_gamma_empirical <- function(W_tilde,
     }
     return(gamma_new)
 }
+
+#update gamma with fixed pi
+update_gamma_fixedpi <- function(W_tilde, 
+                         W_T, pi_pre, v, tau_w
+){                              
+    gamma_new <- matrix(0, nrow = D, ncol = K)
+    # para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + 
+    #     (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
+    for (d in 1:D){
+        for (k in 1:K){
+            # p_temp <- 1/(1+exp(-para[d,k]))
+            gamma_new[d,k] = rbinom(n=1, size = 1, prob = pi_pre)
+        }
+    }
+    return(gamma_new)
+}
