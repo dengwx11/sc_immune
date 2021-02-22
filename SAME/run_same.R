@@ -8,6 +8,7 @@ source("SAME/clean_format.R")
 
 
 SAME <- function(Y0, X, W_tilde,
+                 empirical_pi,
                  mcmc_samples_theta1, Lambda, c_k, YSG, alpha = 0.5)
 {
   
@@ -19,7 +20,7 @@ SAME <- function(Y0, X, W_tilde,
   ## Initialization (lower case)
   # Noninformative Prior Parameters
   
-  tau_v = 0.01
+  tau_v = 0
   alpha_prior_e = 10^(-6)
   beta_prior_e = 10^(-6)
   alpha_prior_x = 10^(-6)
@@ -51,8 +52,8 @@ SAME <- function(Y0, X, W_tilde,
     # v_est[[i]] <- true_v
   }
   
-  pi_ber_est <- matrix(0.3, nrow =  mcmc_samples_theta2+1, ncol = 1)
-  pi_ber_est[1] <- 0.3
+  pi_ber_est <- matrix(empirical_pi, nrow =  mcmc_samples_theta2+1, ncol = 1)
+  pi_ber_est[1] <- empirical_pi
   tau_x_est <- matrix(1000, nrow =  mcmc_samples_theta2+1, ncol = D)
   tau_x_est[1,] <- 1
   #tau_x_est <- matrix(raw_X[[1]]$tau_xd, nrow =  1, ncol = D)[rep(1,mcmc_samples_theta2+1),]
@@ -96,10 +97,14 @@ SAME <- function(Y0, X, W_tilde,
       {
         last_v = Lambda[i+1]
       }else {last_v = k-1}
-      gamma_est[[k]] <- update_gamma(W_tilde, 
-                                    w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
-      )
+      # gamma_est[[k]] <- update_gamma(W_tilde, 
+      #                               w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
+      # )
 
+      # update gamma with empirical pi
+      gamma_est[[k]] <- update_gamma_fixedpi(W_tilde,
+                                     w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
+      )
       
       v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                            tau_v=tau_v
