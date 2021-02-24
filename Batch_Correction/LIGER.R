@@ -60,13 +60,16 @@ YSG <- readRDS("data/NSCLC/sg.list.rds")
 #                                PBMC_HCL = PBMC_seur.logTPM))
 # ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.TPM/100, 
 #                                PBMC_HCL = PBMC_seur.TPM/100))
-ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.TPM/100, 
-                               PBMC_HCL = PBMC_seur.TPM/100,
-                               Lung_HCL = Lung_seur.TPM/100))                               
+ifnb_liger <- createLiger(list(NSCLC = NSCLC_seur.TPM, 
+                               PBMC_HCL = PBMC_seur.TPM,
+                               Lung_HCL = Lung_seur.TPM))                               
 ifnb_liger <- normalize(ifnb_liger)
 ifnb_liger <- selectGenes(ifnb_liger)
 ifnb_liger@var.genes <- intersect(YSG,ifnb_liger@var.genes)
-ifnb_liger <- scaleNotCenter(ifnb_liger) 
+#ifnb_liger <- scaleNotCenter(ifnb_liger)
+ifnb_liger@scale.data$NSCLC  <- t(as.matrix(ifnb_liger@norm.data$NSCLC[ifnb_liger@var.genes,]))
+ifnb_liger@scale.data$PBMC_HCL  <- t(as.matrix(ifnb_liger@norm.data$PBMC_HCL[ifnb_liger@var.genes,]))
+ifnb_liger@scale.data$Lung_HCL  <- t(as.matrix(ifnb_liger@norm.data$Lung_HCL[ifnb_liger@var.genes,]))
 
 ## Stage II: joint matrix factorization
 ifnb_liger <- optimizeALS(ifnb_liger, k = 20)
