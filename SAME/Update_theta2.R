@@ -96,7 +96,7 @@ update_v <- function(tau_w, W_T, gamma,
                 v_new[d,k] <- rnorm(n=1, para2[d,k], sd = (1/sqrt(para1)))
             }
             if (gamma[d,k] == 0){
-                v_new[d,k] <- rnorm(n=1, 0, sd = (1/sqrt(tau_v)))
+                v_new[d,k] <- rnorm(n=1, 0, sd = 0)
             }
         }
     }
@@ -248,3 +248,27 @@ update_tau_w <- function (W_T, v, gamma,
 #     return(gamma_new)
 # }
 
+#update gamma with fixed pi
+update_gamma_fixedpi <- function(W_tilde, 
+                         W_T, pi_pre, v, tau_w
+){
+    #############
+    #### Input:
+    ## W_tilde: empirical weight matrix, D*K
+    ## W_T: a list of W_hat from each tissue, and the length of the list is T, the dimension of each W_hat is D*K
+    ## pi_pre: estimated pi from the last step. 
+    ## v: D*K
+    #### Output:
+    ## gamma_new: a matrix of Bernoulli variables, D*K
+    #############                                 
+    gamma_new <- matrix(0, nrow = D, ncol = K)
+    # para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + 
+    #     (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
+    for (d in 1:D){
+        for (k in 1:K){
+            # p_temp <- 1/(1+exp(-para[d,k]))
+            gamma_new[d,k] = rbinom(n=1, size = 1, prob = pi_pre)
+        }
+    }
+    return(gamma_new)
+}
