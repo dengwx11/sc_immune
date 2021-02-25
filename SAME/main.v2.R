@@ -6,7 +6,7 @@ library(ggplot2)
 library(Biobase)
 library(plotROC)
 #set.seed(2021)
-source('SAME/run_same.R')
+source('SAME/run_same.v2.R')
 source('SAME/run_Simulation.R')
 
 ######### semi simulation
@@ -54,7 +54,8 @@ mcmc_samples_theta1 = 30
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 
 alpha=1
-rst1 <- SAME(Y0, X, W_tilde,
+empirical_pi=0.3
+rst1 <- SAME(Y0, X, W_tilde, empirical_pi,
             mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
 
 

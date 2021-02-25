@@ -88,7 +88,7 @@ simulate_sigmat_w <- function(iteration, D, K, pi_ber, T){
 }
 
 #generate z
-generate_z <- function(K,N,){
+generate_z <- function(K,N){
   Z <- matrix(0, nrow = K, ncol = N)
   for (n in 1:N){
     zn = 0

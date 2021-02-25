@@ -96,7 +96,7 @@ update_v <- function(tau_w, W_T, gamma,
                 v_new[d,k] <- rnorm(n=1, para2[d,k], sd = (1/sqrt(para1)))
             }
             if (gamma[d,k] == 0){
-                v_new[d,k] <- rnorm(n=1, 0, sd = 0)
+                v_new[d,k] <- rnorm(n=1, 0, sd = (1/sqrt(tau_v))
             }
         }
     }
