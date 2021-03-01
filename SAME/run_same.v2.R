@@ -3,7 +3,7 @@ source("SAME/Update_theta1.v2.R")
 source("SAME/Update_theta2.v2.R")
 source("SAME/clean_format.R")
 
-SAME <- function(Y0, X, W_tilde,
+SAME <- function(X,
                  empirical_pi,
                  mcmc_samples_theta1, Lambda, c_k, YSG, alpha = 0.5)
 {
@@ -16,7 +16,7 @@ SAME <- function(Y0, X, W_tilde,
   ## Initialization (lower case)
   # Noninformative Prior Parameters
   
-  tau_v = 0
+  tau_v = 0.6
   alpha_prior_e = 10^(-6)
   beta_prior_e = 10^(-6)
   alpha_prior_x = 10^(-6)
@@ -86,14 +86,8 @@ SAME <- function(Y0, X, W_tilde,
       {
         last_v = Lambda[i+1]
       }else {last_v = k-1}
-      gamma_est[[k]] <- update_gamma(W_tilde, 
-                                    w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
-      )
+      gamma_est[[k]] <- update_gamma(w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j])
 
-      # update gamma with empirical pi
-    #   gamma_est[[k]] <- update_gamma_fixedpi(W_tilde,
-    #                                  w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j]
-    #   )
       
       v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
                            tau_v=tau_v
@@ -126,8 +120,8 @@ SAME <- function(Y0, X, W_tilde,
     tau_w_same <- matrix(tau_w_est[(start_idx+1):(end_idx+1),], nrow = 1, ncol = Lambdai)
 
     
-    w_est <- update_w(Y0, X_mat, W_tilde,
-                      gamma_same, v_same, tau_x_same, tau_w_same, w_est, t0=1, Cl
+    w_est <- update_w(X_mat, 
+                      gamma_same, v_same, tau_x_same, tau_w_same, w_est, Cl
     )
     
   }

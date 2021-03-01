@@ -24,7 +24,7 @@ tau_w_para = 1  ## var(w)= 1/tau_w_para, smaller value --> bigger tissue-specifi
 tau_xd_beta_para = 1  ## var(x)=tau_xd_beta_para approximately, 
                        ## tau_xd = rgamma(D, 1, tau_xd_beta_para)
                        ## smaller value --> smaller single cell expression variation
-corrupt_pi =  0.6 ## corruption rate due to shallow sequencing depth
+corrupt_pi =  0.4 ## corruption rate due to shallow sequencing depth
 ########
 set.seed(2021)
 same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi)
@@ -55,7 +55,7 @@ Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 
 alpha=1
 empirical_pi=0.3
-rst1 <- SAME(Y0, X, W_tilde, empirical_pi,
+rst1 <- SAME(X, empirical_pi,
             mcmc_samples_theta1, Lambda, c_k, YSG, alpha =1)
 
 
@@ -138,3 +138,12 @@ tbl_1_06 <- tbl_1
 
 
 ggplot(tbl_1, aes(d=True_Gamma,m=Estmated_Gamma,color=factor(corrupt_pi)))+geom_roc(n.cuts = 0)
+
+## EB
+gamma <- get_est_vg(rst1)$averg_gamma
+est_vg <- get_est_vg(rst1)$vg
+# v
+idc_W_tilde_orig <-(1*(est_vg>0))
+sum(idc_W_tilde_orig)/sum(est_vg^2*idc_W_tilde_orig)
+#pi
+mean(gamma)

@@ -1,7 +1,7 @@
 set.seed(2021)
 
-update_w <- function(Y0, X_mat, W_tilde,
-                      gamma, v, tau_x, tau_w, w, t0=1, Cl
+update_w <- function(X_mat, 
+                      gamma, v, tau_x, tau_w, w, Cl
                       ){
   Lambdai = ncol(tau_w)
   end_idx = 0
