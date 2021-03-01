@@ -23,3 +23,14 @@ get_est_vg <- function(rst){
   ans$averg_gamma <- average_gamma_est
   return(ans)                 
 }
+                   
+PlotCompare <- function(i,j,W_tilde){
+    W_tilde_A <- W_tilde[[i]]
+    W_tilde_B <- W_tilde[[j]]
+    celltype.intersect <- intersect(colnames(W_tilde_A),colnames(W_tilde_B))
+    df.cor1 <- melt(W_tilde_A[,celltype.intersect],value.name = "tissue1")
+    df.cor2 <- melt(W_tilde_B[,celltype.intersect],value.name = "tissue2")
+    df.cor <- cbind(df.cor1,tissue2=df.cor2[,3])
+    colnames(df.cor)[c(1:2)] <- c("gene","celltype")
+    return(df.cor)
+}    
