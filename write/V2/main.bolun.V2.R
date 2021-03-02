@@ -1,3 +1,91 @@
+PBMC_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/PBMC_ImmuneCell_updated.rds")
+Lung_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/Lung_ImmuneCell_updated.rds")
+# Kidney_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/Kidney_ImmuneCell_updated.rds")
+BM_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/BM_ImmuneCell_updated.rds")
+CB_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/CB_ImmuneCell_updated.rds")
+# Liver_seur <- readRDS("/data4/lbl/Yale/HCL/protein_coding/Liver_ImmuneCell_updated.rds")
+
+#signature gene, celltype, and tissue lists
+YSG <- readRDS("/data4/lbl/Yale/HCL/SAME/sg.list.rds")
+celltype.list <- c("B", "Neutrophil", "NK cell", "T")
+tissue.list <- c("PBMC", "Lung", "CB", "BM")
+
+#change expression profile into TPM space
+# Lung_seur <- NormalizeData(Lung_seur, scale.factor = 1000000)
+# hcl_mat <- expm1(as.matrix(Lung_seur@assays$RNA@data))
+# Lung_seur[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
+# sum(Lung_seur@assays$TPM@counts[,1])
+
+# CB_seur <- NormalizeData(CB_seur, scale.factor = 1000000)
+# hcl_mat <- expm1(as.matrix(CB_seur@assays$RNA@data))
+# CB_seur[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
+# sum(CB_seur@assays$TPM@counts[,1])
+
+# BM_seur <- NormalizeData(BM_seur, scale.factor = 1000000)
+# hcl_mat <- expm1(as.matrix(BM_seur@assays$RNA@data))
+# BM_seur[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
+# sum(BM_seur@assays$TPM@counts[,1])
+
+PBMC_seur <- NormalizeData(PBMC_seur, scale.factor = 1000000)
+hcl_mat <- expm1(as.matrix(PBMC_seur@assays$RNA@data))
+PBMC_seur[["TPM"]] <- CreateAssayObject(counts = hcl_mat)
+
+############################
+###prepare for SAME input###
+############################
+data_set_list <- list()
+data_set_list[[1]] <- subset(PBMC_seur, Celltype_used %in% celltype.list)
+data_set_list[[2]] <- subset(Lung_seur, Celltype_used %in% celltype.list)
+data_set_list[[3]] <- subset(CB_seur, Celltype_used %in% celltype.list)
+data_set_list[[4]] <- subset(BM_seur, Celltype_used %in% celltype.list)
+rm(PBMC_seur, Lung_seur, CB_seur, BM_seur)
+
+X <- data_set_list
+Cl <- get_Cl(X)
+print(Cl$levels)
+tmp <- Reduce(intersect, lapply(X, function(x) rownames(x)))
+Y0 <- read.table("/data/NSCLC/Fig2b-WholeBlood_RNAseq.txt", row.names = 1, header = T, sep = "\t")
+YSG <- intersect(YSG, tmp)
+YSG <- intersect(YSG, rownames(Y0))
+T = length(data_set_list)
+K = length(Cl$levels)
+c_k = matrix(0, nrow = K, ncol = T)
+D = length(YSG)
+
+for (t in 1:T){
+  seur = data_set_list[[t]]
+  for (k in 1:K){
+    seur.list <- SplitObject(seur, split.by = "Celltype_used")
+    if (is.null(seur.list[[celltype.list[k]]])){
+      c_k[k,t] = 0
+    } else {
+      c_k[k,t] = ncol(seur.list[[celltype.list[k]]])
+    }
+  }
+}
+W_tilde <- matrix(0, nrow = D, ncol = K)
+seur_t0 <- data_set_list[[1]]
+for (k in 1:K){
+  seur_t0.list <- SplitObject(seur_t0, split.by = "Celltype_used")
+  if (is.null(seur_t0.list[[celltype.list[k]]])){
+    W_tilde[,k] = 0
+  } else {
+    seur_t0_k <- seur_t0.list[[celltype.list[k]]]
+    W_tilde[,k] = apply(seur_t0_k@assays$RNA@counts[YSG,], 1, mean)
+  }
+  colnames(W_tilde) <- celltype.list
+}
+
+mcmc_samples_theta1 = 50
+Lambda = c(0:mcmc_samples_theta1)
+#change line 13 code as mat <- X@assays$TPM@counts
+
+rst <- Y_batch_correct(Y0, X[[1]], YSG)
+Y0_sc <- rst$bulk_to_sc
+Y0_sc <- Y0_sc[YSG,] #TPM space
+N = ncol(Y0_sc)
+C0 = sum(c_k)
+
 corr_celltype <- c()
 pr_gamma_rst <- c()
 empirical_pi <- c(0.1, 0.15, 0.2, 0.25, 0.3)
