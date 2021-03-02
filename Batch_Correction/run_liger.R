@@ -105,3 +105,15 @@ output_tissue_indicator <- function(tissue_gene_list){
                
     return(w)           
 }
+               
+integrate_celltype <- function(w_tissue_indicator,celltype_list,YSG){
+    ngene <- length(YSG)
+    for(i in seq(length(w_tissue_indicator))){
+        orig_celltype <- colnames(w_tissue_indicator[[i]])
+        deficient_celltype <- setdiff(celltype_list,orig_celltype)
+        w_tissue_indicator[[i]] <- cbind(w_tissue_indicator[[i]], matrix(0,nrow=ngene,ncol=length(deficient_celltype)))
+        colnames(w_tissue_indicator[[i]]) <- c(orig_celltype,deficient_celltype)
+        w_tissue_indicator[[i]] <- w_tissue_indicator[[i]][YSG,celltype_list]
+    }
+    return(w_tissue_indicator)
+}               

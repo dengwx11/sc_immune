@@ -139,6 +139,10 @@ SAME <- function(X,w_tissue_indicator,
   rst$theta2$pi_ber <- pi_ber_est
   rst$theta2$tau_x <- tau_x_est
   rst$theta2$tau_w <- tau_w_est
+    
+  ans <- get_est_vg(rst)
+  rst$vg <-  ans$vg
+  rst$averg_gamma <- ans$averg_gamma  
   
   return(rst)
   
