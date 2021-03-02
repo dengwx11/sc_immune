@@ -3,9 +3,9 @@ source("SAME/Update_theta1.v2.R")
 source("SAME/Update_theta2.v2.R")
 source("SAME/clean_format.R")
 
-SAME <- function(X,
+SAME <- function(X,w_tissue_indicator,
                  empirical_pi,
-                 mcmc_samples_theta1, Lambda, c_k, YSG, alpha = 0.5)
+                 mcmc_samples_theta1, Lambda, c_k, YSG)
 {
   
   Cl <- get_Cl(X)
@@ -33,8 +33,7 @@ SAME <- function(X,
   # matrix is stored as the newest one 
   # theta2
   mcmc_samples_theta2 = sum(Lambda)
-  alpha_unif_est <- matrix(alpha, nrow =  mcmc_samples_theta2+1, ncol = 1)
-  #alpha_unif_est[1] <- 0.5
+
   gamma_est <- list()
   for(i in 1:Lambda[length(Lambda)]){
     gamma_est[[i]] <- matrix(rbinom(D*K,1,0.5),nrow = D, ncol = K)
@@ -86,10 +85,10 @@ SAME <- function(X,
       {
         last_v = Lambda[i+1]
       }else {last_v = k-1}
-      gamma_est[[k]] <- update_gamma(w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j])
+      gamma_est[[k]] <- update_gamma(w_est, pi_ber_est[j], v_est[[ last_v ]], tau_w_est[j],w_tissue_indicator)
 
       
-      v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],
+      v_est[[k]]<-update_v(tau_w_est[j], w_est, gamma_est[[k]],w_tissue_indicator,
                            tau_v=tau_v
       )
 
@@ -98,12 +97,12 @@ SAME <- function(X,
       #                                  alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
       # )
       
-      tau_x_est[j+1,] <- update_tau_x(X_mat, 
-                      w_est, Cl,
+      tau_x_est[j+1,] <- update_tau_x(X_mat, w_tissue_indicator,
+                      w_est, Cl, c_k,
                       alpha_x = alpha_prior_x, beta_x = beta_prior_x
                       )
                        
-      tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],
+      tau_w_est[j+1] <- update_tau_w(w_est, v_est[[k]], gamma_est[[k]],w_tissue_indicator,
                                      alpha_w = alpha_prior_w, beta_w = beta_prior_w
       )   
                 
@@ -135,7 +134,6 @@ SAME <- function(X,
   rst$theta1$w <- w_est
   
 
-  rst$theta2$alpha_unif <- alpha_unif_est
   rst$theta2$gamma <- gamma_est
   rst$theta2$v <- v_est
   rst$theta2$pi_ber <- pi_ber_est

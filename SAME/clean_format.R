@@ -33,4 +33,6 @@ PlotCompare <- function(i,j,W_tilde){
     df.cor <- cbind(df.cor1,tissue2=df.cor2[,3])
     colnames(df.cor)[c(1:2)] <- c("gene","celltype")
     return(df.cor)
-}    
+}
+                   
+                   

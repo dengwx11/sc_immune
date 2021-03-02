@@ -73,20 +73,35 @@ get_WH_W_tilde <- function(liger,seur.TPM_list,seur_list){
 }
 
 
-get_tissue_gene <- function(target_idx, ref_idx_list, W_tilde){
+get_tissue_gene <- function(target_idx, W_tilde,tissue_list){
     ans <- list()
-    for(i in seq(length(ref_idx_list))){
-        ref_idx <- ref_idx_list[i]
-        df.cor <- PlotCompare(target_idx,ref_idx,W_tilde)
+
+    for(i in seq(length(tissue_list))){
+        df.cor <- PlotCompare(target_idx,i,W_tilde)
         df.cor$ratio <- df.cor$tissue2/df.cor$tissue1
+        if(i != target_idx){
+            
+            ratio_to_plot <- log(df.cor$ratio)
+            km <- Ckmeans.1d.dp(ratio_to_plot,k=3)
 
-        df.cor.plot <- df.cor
-        ratio_to_plot <- log(df.cor.plot$ratio)
-        km <- Ckmeans.1d.dp(ratio_to_plot,k=3)
-
-        df.cor.plot$cluster <- km$cluster
-        ans[[i]] <- df.cor.plot[df.cor.plot$cluster %in% 2,]
+            df.cor$cluster <- km$cluster
+            
+        }else{
+            df.cor$cluster <- 2
+        }
+        #ans[[i]] <- df.cor[df.cor$cluster %in% 2,]
+        ans[[i]] <- df.cor
+        ans[[i]]$tissue <- tissue_list[i]
     }
+    names(ans) <- tissue_list
     return(ans)
 }
 
+output_tissue_indicator <- function(tissue_gene_list){
+    w <- lapply(tissue_gene_list,function(g) dcast(g, gene ~ celltype, value.var="cluster"))
+    w<- lapply(w,function(W) {rownames(W)=W$gene;return(W[,-1])})
+    w<- lapply(w,function(W) 1*(W==2)) 
+    names(w) <- names(tissue_gene_list)           
+               
+    return(w)           
+}

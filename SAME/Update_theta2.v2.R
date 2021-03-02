@@ -5,7 +5,7 @@ set.seed(2020)
 
 
 #update gamma
-update_gamma <- function(W_T, pi_pre, v, tau_w
+update_gamma <- function(W_T, pi_pre, v, tau_w, W_T_indicator
 ){
   #############
   #### Input:
@@ -14,10 +14,11 @@ update_gamma <- function(W_T, pi_pre, v, tau_w
   ## v: D*K
   #### Output:
   ## gamma_new: a matrix of Bernoulli variables, D*K
-  #############                                 
+  #############
+  T = length(W_T)  
   gamma_new <- matrix(0, nrow = D, ncol = K)
-  para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(W_T, function(x)(x-v)^2)) + 
-    (tau_w/2)*Reduce("+", lapply(W_T, function(x)x^2))
+  para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(c(1:T), function(i)(W_T[[i]]-v)^2)*W_T_indicator[[i]]) + 
+    (tau_w/2)*Reduce("+", lapply(c(1:T), function(x)W_T[[i]]^2*W_T_indicator[[i]]))
   for (d in 1:D){
     for (k in 1:K){
       p_temp <- 1/(1+exp(-para[d,k]))
@@ -28,7 +29,7 @@ update_gamma <- function(W_T, pi_pre, v, tau_w
 }
 
 #update v
-update_v <- function(tau_w, W_T, gamma,
+update_v <- function(tau_w, W_T, gamma,W_T_indicator,
                      tau_v=0.01
 ){
   #############
@@ -42,7 +43,7 @@ update_v <- function(tau_w, W_T, gamma,
   #############                              
   v_new <- matrix(0, nrow = D, ncol = K)
   para1 <- T*tau_w + tau_v
-  para2 <- (1/para1)*tau_w*Reduce("+", W_T)
+  para2 <- (1/para1)*tau_w*Reduce("+", lapply(c(1:T), function(i) W_T[[i]]*W_T_indicator[[i]]))
   #print(c(para1,para2))
   #print(str(para2))
   for (d in 1:D){
@@ -70,7 +71,8 @@ update_pi_est <- function(gamma,
 
 #update tau_x
 update_tau_x <- function(X, #X is a list of gene expression matrix from each tissue. For each matrix, cells should be ordered by cell types
-                         W_T, Cl,
+                         W_T_indicator,
+                         W_T, Cl, c_k,
                          alpha_x = 10^(-6), beta_x = 10^(-6)
 ){
   #############
@@ -80,22 +82,27 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
   ## c_k: sequence of cell counts for each cell type and each tissue, K*T
   #### Output:
   ## tau_x_new: 1*D
-  #############                                 
+  #############
+  C0 <- Reduce('+',lapply(W_T_indicator,function(x) sum(x)))
+    
   tau_x_new <- matrix(0,nrow = 1, ncol = D)
   para2_list <- list()
   para2_temp <- matrix(0, nrow = 1, ncol = D)
   end_idx = 0
   for (t in 1:T){
     w_t <- W_T[[t]]
+    w_t_indicator <- W_T_indicator[[T]]
     w_temp <- matrix(0, nrow = D, ncol = sum(c_k[,t]))
+    w_indicator_temp <- matrix(0, nrow = D, ncol = sum(c_k[,t]))
     start_idx <- end_idx + 1
     end_idx <- start_idx + sum(c_k[,t])-1
     for (k in 1:K){                         
       idx = which(Cl[start_idx:end_idx] == k)
       w_temp[,idx] = w_t[,k]
+      w_indicator_temp[,idx] = w_t_indicator[,k]
     }
     x_t <- as.matrix(X[[t]])
-    para2_term1 <- ((x_t - w_temp)^2)/2
+    para2_term1 <- ((x_t - w_temp)^2*w_indicator_temp)/2
     para2_list[[t]] <- apply(para2_term1, 1, sum)
     para2_temp = para2_temp + para2_list[[t]]
   }
@@ -108,7 +115,7 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
 }
 
 #update tau_w
-update_tau_w <- function (W_T, v, gamma,
+update_tau_w <- function (W_T, v, gamma, W_T_indicator,
                           alpha_w = 10^(-6), beta_w = 10^(-6)
 ){
   #############
@@ -120,7 +127,7 @@ update_tau_w <- function (W_T, v, gamma,
   ## tau_w_new: all the w share this same tau_w
   #############                                   
   para1 <- (T*D*K/2) + alpha_w
-  para2 <- sum(Reduce("+", lapply(W_T, function(x)(x-v*gamma)^2)))/2 + beta_w
+  para2 <- sum(Reduce("+", lapply(c(1:T), function(i)(W_T[[i]]-v*gamma)^2*W_T_indicator[[i]])))/2 + beta_w
   tau_w_new <- rgamma(1, para1, para2)
   return(tau_w_new)
 }

@@ -24,7 +24,6 @@ YSG <- intersect(YSG,liger@var.genes)
 W_tilde <- get_WH_W_tilde(liger,seur.TPM_list,seur_list)
 
 target_idx <- which(tissue_list == taget_tissue)
-ref_idx_list <- setdiff(seq(length(tissue_list)),target_idx)
 
-tissue_gene_list <- get_tissue_gene(target_idx, ref_idx_list, W_tilde)
-names(tissue_gene_list) <- tissue_list[ref_idx_list]
+tissue_gene_list <- get_tissue_gene(target_idx, W_tilde,tissue_list)
+w_tissue_indicator <- output_tissue_indicator(tissue_gene_list)
