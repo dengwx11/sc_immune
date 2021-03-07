@@ -24,9 +24,16 @@ update_w <- function(X_mat,
     tau_wt <- lapply(1:Lambdai, function(j) matrix(tau_x[,j], nrow = D, ncol = 1) %*% C_mat +tau_w[1,j])
     tau_wt <- Reduce('+', tau_wt)
 
-    res1 <- sapply(c(1:K), function(k) apply(Xt[, sample(which(Cl[start_idx:end_idx] == k),sample.cnt,replace=T)],1,sum))
+    k.idx <- which(Cl[start_idx:end_idx] == k)
 
-    res1 <- lapply(1:Lambdai, function(j) tau_x[,rep(j,K)] * res1)
+    if(length(k.idx)>0){
+      res1 <- sapply(c(1:K), function(k) apply(Xt[, sample(k.idx,sample.cnt,replace=T)],1,sum))
+
+      res1 <- lapply(1:Lambdai, function(j) tau_x[,rep(j,K)] * res1)
+    }else{
+      res1 <- lapply(1:Lambdai, function(j) matrix(0,nrow=D,ncol=K))
+    }
+
 
     res2 <- lapply(1:Lambdai, function(j) tau_w[1,j]*v[[j]]*gamma[[j]])
 
