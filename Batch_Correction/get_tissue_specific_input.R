@@ -33,6 +33,7 @@ get_tissue_specific_input <- function(taget_tissue,tissue_list,celltype_list,fil
     ans <- list()
     ans$YSG <- YSG
     ans$w_tissue_indicator <- w_tissue_indicator
+    ans$X <- seur_list
     return(ans)
     
 }
