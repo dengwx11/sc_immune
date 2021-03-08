@@ -18,7 +18,7 @@ update_gamma <- function(W_T, pi_pre, v, tau_w, W_T_indicator
   T = length(W_T)  
   gamma_new <- matrix(0, nrow = D, ncol = K)
   para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(c(1:T), function(i)((W_T[[i]]-v)^2)*W_T_indicator[[i]])) + 
-    (tau_w/2)*Reduce("+", lapply(c(1:T), function(x)W_T[[i]]^2*W_T_indicator[[i]]))
+    (tau_w/2)*Reduce("+", lapply(c(1:T), function(i)W_T[[i]]^2*W_T_indicator[[i]]))
   for (d in 1:D){
     for (k in 1:K){
       p_temp <- 1/(1+exp(-para[d,k]))
