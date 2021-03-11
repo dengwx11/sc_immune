@@ -11,7 +11,7 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,outp
     YSG <- ans$YSG
     w_tissue_indicator <- ans$w_tissue_indicator
     seur.TPM_list <- ans$seur.TPM_list
-    seur_list <- ans$seur_list
+    seur_list <- ans$X
     liger <- ans$liger
     
     celltype_lists <- lapply(seq(length(seur_list)),function(i) seur_list[[i]]$Celltype_used)
