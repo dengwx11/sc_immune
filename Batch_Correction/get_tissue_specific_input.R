@@ -21,11 +21,8 @@ get_tissue_specific_input <- function(taget_tissue,tissue_list,celltype_list,fil
     seur_list <- liger_output$seur_list
     liger <- liger_output$liger
     YSG <- intersect(YSG,liger@var.genes)
-
     W_tilde <- get_WH_W_tilde(liger,seur.TPM_list,seur_list)
-
     target_idx <- which(tissue_list == taget_tissue)
-
     tissue_gene_list <- get_tissue_gene(target_idx, W_tilde,tissue_list)
     w_tissue_indicator <- output_tissue_indicator(tissue_gene_list)
     w_tissue_indicator <- integrate_celltype(w_tissue_indicator,celltype_list,YSG)
@@ -33,6 +30,14 @@ get_tissue_specific_input <- function(taget_tissue,tissue_list,celltype_list,fil
     ans <- list()
     ans$YSG <- YSG
     ans$w_tissue_indicator <- w_tissue_indicator
+    ans$seur.TPM_list <- seur.TPM_list
+    ans$seur_list <- seur_list
+    ans$liger <- liger
     return(ans)
     
 }
+
+
+## operate demo
+#source('Batch_Correction/get_tissue_specific_input.R')
+#ans <- get_tissue_specific_input(taget_tissue,tissue_list,celltype_list,files,YSG,output_path)

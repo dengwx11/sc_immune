@@ -3,16 +3,56 @@ source("SAME/Update_theta1.v2.R")
 source("SAME/Update_theta2.v2.R")
 source("SAME/clean_format.R")
 
-SAME <- function(X,w_tissue_indicator,
+
+run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path,empirical_pi){
+    
+    ans <- get_tissue_specific_input(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path)
+    
+    YSG <- ans$YSG
+    w_tissue_indicator <- ans$w_tissue_indicator
+    seur.TPM_list <- ans$seur.TPM_list
+    seur_list <- ans$seur_list
+    liger <- ans$liger
+    
+    celltype_lists <- lapply(seq(length(seur_list)),function(i) seur_list[[i]]$Celltype_used)
+    used_cell <- get_used_cell(celltype_lists,celltype_used_list)
+    ans <- keep_used_cell(seur_list,used_cell, YSG)
+    X_mat <- ans$X_mat  
+    celltype_lists <- ans$celltype_lists    
+        
+        
+    c_k<-get_c_k(celltype_lists,celltype_used_list)
+    
+    
+                             
+                             
+    Cl <- get_Cl(celltype_lists,celltype_used_list)$Cl 
+                             
+    
+                             
+    K = length(celltype_used_list)
+    T = length(tissue_list)
+    D = length(YSG)                         
+    rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
-                 mcmc_samples_theta1, Lambda, c_k, YSG)
+                 mcmc_samples_theta1, Lambda, YSG)                         
+}
+
+SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
+                 empirical_pi,
+                 mcmc_samples_theta1, Lambda, YSG)
 {
+    
+    ##### Input ######
+    ## X_mat: list of expr matrix
+    ## w_tissue_indicator: list of tissue-celltype-specific gene matrix T(tissue)*D(gene)*K(celltype)
+    ## empiricla_pi
+    
+    
   
-  Cl <- get_Cl(X)
-  celltype_list <- Cl$levels
-  Cl = Cl$Cl
+
   
-  X_mat <- get_X_mat(X, YSG)
+  
   ## Initialization (lower case)
   # Noninformative Prior Parameters
   

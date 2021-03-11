@@ -1,18 +1,37 @@
-get_Cl <- function(X){
-    Cl <- Reduce(c, lapply(X, function(X) as.vector(X$Celltype_used)) )
-    Cl <- factor(Cl)
-    celltype_list <- levels(Cl)
+get_used_cell <- function(celltype_lists,celltype_used_list){
+    used_cell <- lapply(celltype_lists, function(celltype_list) which(celltype_list %in% celltype_used_list))
+    return(used_cell) 
+}
+                        
+                       
+
+get_Cl <- function(celltype_lists,celltype_used_list){
+    
+    Cl <- Reduce(c, lapply(celltype_lists, function(celltype_list) as.vector(celltype_list)) )
+    Cl <- factor(Cl,levels = celltype_used_list)
     Cl <- as.numeric(Cl)
-    Cl <- list(Cl = Cl, levels = celltype_list)
+    Cl <- list(Cl = Cl, levels = celltype_used_list)
     return(Cl)
 }
 
-get_X_mat <- function(X, SG){
-    X_mat <- list()
-    for(i in 1:length(X)) X_mat[[i]] <- X[[i]]@assays$RNA@counts[YSG,]
+get_X_mat <- function(X, YSG){
+    
+    X_mat <- lapply(X, function(x) x@assays$RNA@counts[YSG,])
     return(X_mat)
 }
 
+keep_used_cell <- function(seur_list,used_cell, YSG){
+    seur_list <- lapply(seq(length(seur_list)), function(i) subset(seur_list[[i]], cells = Cells(seur_list[[i]])[used_cell[[i]]]))
+    X_mat <- get_X_mat(seur_list, YSG)
+    celltype_lists <- lapply(seq(length(seur_list)),function(i) seur_list[[i]]$Celltype_used)
+    
+    ans <- list()
+    ans$X_mat <- X_mat
+    ans$celltype_lists <- celltype_lists
+    
+    return(ans)                          
+    
+} 
 
 get_est_vg <- function(rst){
   est_vg <- lapply(c(1:mcmc_samples_theta1), function(i) rst$theta2$gamma[[i]] * rst$theta2$v[[i]])
@@ -34,5 +53,16 @@ PlotCompare <- function(i,j,W_tilde){
     colnames(df.cor)[c(1:2)] <- c("gene","celltype")
     return(df.cor)
 }
+                   
+get_c_k <- function(celltype_lists,celltype_used_list){
+    
+    c_k <- lapply(seq(length(celltype_lists)), function(i) table(celltype_lists[[i]]))
+    c_k <- lapply(seq(length(celltype_lists)), function(i) c_k[[i]] <- c_k[[i]][celltype_used_list])             
+    c_k <- t(Reduce(rbind,c_k))
+    c_k[is.na(c_k)]<-0
+    c_k <- t(c_k)
+    rownames(c_k) <- names(celltype_lists)              
+    return(c_k)              
+}                  
                    
                    
