@@ -11,7 +11,7 @@ generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
   meta_prop[,2] <- meta_prop[,2]/sum(meta_prop[,2])
   rownames(meta_prop) <- meta_prop[,1]
   meta_prop <- meta_prop[,-1]
-  mat <- X@assays$RNA@counts[YSG,]
+  mat <- exp(X@assays$RNA@data[YSG,])-1
   #psb_mat <- matrix(0, ncol = 10001, nrow = length(YSG))
   psb_mat <- data.frame(rep(0, length(YSG)), row.names = YSG)
   for(i in 1:length(Cl)){

@@ -50,7 +50,7 @@ true_gamma = same_input$true_w$gamma
 cbind(true_v*true_gamma[,1],true_w[[1]][,1],raw_X[[1]]$w_tilde[,1],true_w[[2]][,1],raw_X[[2]]$w_tilde[,1],W_tilde[,1])
 
 # Starting values
-mcmc_samples_theta1 = 30
+mcmc_samples_theta1 = 20
 Lambda = c(0:mcmc_samples_theta1) # Lambda = c(0,1,2,3,...,100)
 
 alpha=1
