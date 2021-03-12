@@ -15,7 +15,9 @@ update_gamma <- function(W_T, pi_pre, v, tau_w, W_T_indicator
   #### Output:
   ## gamma_new: a matrix of Bernoulli variables, D*K
   #############
-  T = length(W_T)  
+  T = length(W_T)
+  K = ncol(W_T[[1]])
+  D = nrow(W_T[[1]])  
   gamma_new <- matrix(0, nrow = D, ncol = K)
   para <- log(pi_pre/(1-pi_pre)) - (tau_w/2)*Reduce("+", lapply(c(1:T), function(i)((W_T[[i]]-v)^2)*W_T_indicator[[i]])) + 
     (tau_w/2)*Reduce("+", lapply(c(1:T), function(i)W_T[[i]]^2*W_T_indicator[[i]]))
@@ -40,7 +42,9 @@ update_v <- function(tau_w, W_T, gamma,W_T_indicator,
   ## gamma: a matrix of Bernoulli variables, D*K 
   #### Output:
   ## v_new: D*K
-  #############                              
+  #############
+  K = ncol(W_T[[1]])
+  D = nrow(W_T[[1]])  
   v_new <- matrix(0, nrow = D, ncol = K)
   para1 <- T*tau_w + tau_v
   para2 <- (1/para1)*tau_w*Reduce("+", lapply(c(1:T), function(i) W_T[[i]]*W_T_indicator[[i]]))
@@ -84,6 +88,8 @@ update_tau_x <- function(X, #X is a list of gene expression matrix from each tis
   ## tau_x_new: 1*D
   #############
   C0 <- Reduce('+',lapply(W_T_indicator,function(x) sum(x)))
+  D <- nrow(W_T_indicator[[1]]) 
+  K <- ncol(W_T_indicator[[1]])                         
     
   tau_x_new <- matrix(0,nrow = 1, ncol = D)
   para2_list <- list()
@@ -125,7 +131,10 @@ update_tau_w <- function (W_T, v, gamma, W_T_indicator,
   ## gamma: a matrix of Bernoulli variables, D*K 
   #### Output:
   ## tau_w_new: all the w share this same tau_w
-  #############                                   
+  ############# 
+  T = length(W_T)
+  D = nrow(W_T[[1]])
+  K = ncol(W_T[[1]])
   para1 <- (T*D*K/2) + alpha_w
   para2 <- sum(Reduce("+", lapply(c(1:T), function(i)(W_T[[i]]-v*gamma)^2*W_T_indicator[[i]])))/2 + beta_w
   tau_w_new <- rgamma(1, para1, para2)

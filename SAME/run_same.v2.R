@@ -2,13 +2,12 @@ set.seed(2021)
 source("SAME/Update_theta1.v2.R")
 source("SAME/Update_theta2.v2.R")
 source("SAME/clean_format.R")
+source('Batch_Correction/get_tissue_specific_input.R')
 
 
 #### demo
 #setwd("~/zhao-data/sc_immune/sc_immune/")
-#source('Batch_Correction/get_tissue_specific_input.R')
 #source('SAME/run_same.v2.R')
-#source("SAME/clean_format.R")
 
 #taget_tissue <- 'PBMC'
 #files = list.files(path = '/gpfs/ysm/home/bl666/HCL/Pseudo_Bulk',pattern = "*_updated.rds", full.names = TRUE)
@@ -16,11 +15,13 @@ source("SAME/clean_format.R")
 #celltype_used_list <- c("B", "Neutrophil", "NK cell", "T")
 #YSG <- readRDS("/gpfs/ysm/pi/zhao-data/wd262/sc_immune/sc_immune/data/NSCLC/sg.list.rds")
 #output_path = "/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/pipeline_on_HCL"
+#mcmc_samples_theta1=50
 
-#rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,liger.turnon=FALSE,output_path)
+#rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,mcmc_samples_theta1,
+#                liger.turnon=FALSE,output_path)
 
 
-run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi,liger.turnon=TRUE,output_path){
+run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi,mcmc_samples_theta1,liger.turnon=TRUE,output_path){
     
     ans <- get_tissue_specific_input(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path,liger.turnon=liger.turnon)
     
@@ -48,7 +49,8 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empi
                              
     K = length(celltype_used_list)
     T = length(tissue_list)
-    D = length(YSG)                         
+    D = length(YSG)
+    Lambda = c(0:mcmc_samples_theta1)                         
     rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
                  mcmc_samples_theta1, Lambda, YSG)
@@ -178,7 +180,7 @@ SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
 
     
     w_est <- update_w(X_mat, 
-                      gamma_same, v_same, tau_x_same, tau_w_same, w_est, Cl
+                      gamma_same, v_same, tau_x_same, tau_w_same, w_est, Cl,c_k
     )
     
   }

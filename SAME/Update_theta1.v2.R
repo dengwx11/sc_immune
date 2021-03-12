@@ -1,11 +1,14 @@
 set.seed(2021)
 
 update_w <- function(X_mat, 
-                      gamma, v, tau_x, tau_w, w, Cl
+                      gamma, v, tau_x, tau_w, w, Cl,c_k
                       ){
   Lambdai = ncol(tau_w)
   end_idx = 0
   w_new <- list()
+  T=length(w)
+  D=nrow(w[[1]])
+  K=ncol(w[[1]])
   
   for(t in 1:T){
     wt_new <- w[[t]]
