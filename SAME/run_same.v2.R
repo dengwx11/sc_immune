@@ -4,9 +4,25 @@ source("SAME/Update_theta2.v2.R")
 source("SAME/clean_format.R")
 
 
-run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path,empirical_pi){
+#### demo
+#setwd("~/zhao-data/sc_immune/sc_immune/")
+#source('Batch_Correction/get_tissue_specific_input.R')
+#source('SAME/run_same.v2.R')
+#source("SAME/clean_format.R")
+
+#taget_tissue <- 'PBMC'
+#files = list.files(path = '/gpfs/ysm/home/bl666/HCL/Pseudo_Bulk',pattern = "*_updated.rds", full.names = TRUE)
+#tissue_list <- c("BM","CB","Kidney","Liver","Lung","PBMC")
+#celltype_used_list <- c("B", "Neutrophil", "NK cell", "T")
+#YSG <- readRDS("/gpfs/ysm/pi/zhao-data/wd262/sc_immune/sc_immune/data/NSCLC/sg.list.rds")
+#output_path = "/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/pipeline_on_HCL"
+
+#rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,liger.turnon=FALSE,output_path)
+
+
+run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi,liger.turnon=TRUE,output_path){
     
-    ans <- get_tissue_specific_input(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path)
+    ans <- get_tissue_specific_input(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path,liger.turnon=liger.turnon)
     
     YSG <- ans$YSG
     w_tissue_indicator <- ans$w_tissue_indicator
@@ -35,7 +51,9 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,outp
     D = length(YSG)                         
     rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
-                 mcmc_samples_theta1, Lambda, YSG)                         
+                 mcmc_samples_theta1, Lambda, YSG)
+    rst$w_tissue_indicator <- w_tissue_indicator                         
+    return(rst)                         
 }
 
 SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,

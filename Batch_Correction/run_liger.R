@@ -1,7 +1,7 @@
 library(rliger)
 source("SAME/clean_format.R")
 
-run_liger <- function(files,tissue_list,YSG,output_path){
+run_liger <- function(files,tissue_list,YSG,output_path,liger.turnon){
     seur.TPM_list <- list()
     seur_list <- list()
     for(i in seq(length(tissue_list))){
@@ -14,21 +14,29 @@ run_liger <- function(files,tissue_list,YSG,output_path){
     }
     names(seur.TPM_list) <- tissue_list
     names(seur_list)<- tissue_list
+    
+    
+    if(liger.turnon){
+        liger <- createLiger(seur.TPM_list) 
+        liger <- normalize(liger)
+        liger <- selectGenes(liger)
+        liger@var.genes <- intersect(YSG,liger@var.genes)
 
-    liger <- createLiger(seur.TPM_list) 
-    liger <- normalize(liger)
-    liger <- selectGenes(liger)
-    liger@var.genes <- intersect(YSG,liger@var.genes)
-    
-    liger <- scaleNotCenter(liger)
-    liger <- optimizeALS(liger, k = 20)
-    liger <- quantile_norm(liger)
-    liger <- louvainCluster(liger, resolution = 0.25)
-    
-    liger <- runTSNE(liger) 
-    liger <- runUMAP(liger)
-    
-    saveRDS(liger,paste0(output_path,"/liger.rds"))
+        liger <- scaleNotCenter(liger)
+        liger <- optimizeALS(liger, k = 20)
+        liger <- quantile_norm(liger)
+        liger <- louvainCluster(liger, resolution = 0.25)
+
+        liger <- runTSNE(liger) 
+        liger <- runUMAP(liger)
+
+        saveRDS(liger,paste0(output_path,"/liger.rds"))
+    }else if(output_path!=""){
+        liger <- readRDS(paste0(output_path,"/liger.rds"))
+    }else{
+        liger <- NA
+    }
+
     
     ans<-list()
     ans$seur.TPM_list <- seur.TPM_list
@@ -106,14 +114,14 @@ output_tissue_indicator <- function(tissue_gene_list){
     return(w)           
 }
                
-integrate_celltype <- function(w_tissue_indicator,celltype_list,YSG){
+integrate_celltype <- function(w_tissue_indicator,celltype_used_list,YSG){
     ngene <- length(YSG)
     for(i in seq(length(w_tissue_indicator))){
         orig_celltype <- colnames(w_tissue_indicator[[i]])
-        deficient_celltype <- setdiff(celltype_list,orig_celltype)
+        deficient_celltype <- setdiff(celltype_used_list,orig_celltype)
         w_tissue_indicator[[i]] <- cbind(w_tissue_indicator[[i]], matrix(0,nrow=ngene,ncol=length(deficient_celltype)))
         colnames(w_tissue_indicator[[i]]) <- c(orig_celltype,deficient_celltype)
-        w_tissue_indicator[[i]] <- w_tissue_indicator[[i]][YSG,celltype_list]
+        w_tissue_indicator[[i]] <- w_tissue_indicator[[i]][YSG,celltype_used_list]
     }
     return(w_tissue_indicator)
 }               

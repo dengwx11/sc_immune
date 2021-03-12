@@ -60,8 +60,8 @@ get_c_k <- function(celltype_lists,celltype_used_list){
     c_k <- lapply(seq(length(celltype_lists)), function(i) c_k[[i]] <- c_k[[i]][celltype_used_list])             
     c_k <- t(Reduce(rbind,c_k))
     c_k[is.na(c_k)]<-0
-    c_k <- t(c_k)
-    rownames(c_k) <- names(celltype_lists)              
+
+    colnames(c_k) <- names(celltype_lists)                   
     return(c_k)              
 }                  
                    
