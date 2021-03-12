@@ -54,7 +54,9 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empi
     rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
                  mcmc_samples_theta1, Lambda, YSG)
-    rst$w_tissue_indicator <- w_tissue_indicator                         
+    rst$w_tissue_indicator <- w_tissue_indicator
+    rst$YSG <- YSG
+    rst$X <- seur_list                         
     return(rst)                         
 }
 
