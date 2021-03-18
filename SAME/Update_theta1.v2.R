@@ -33,7 +33,8 @@ update_w <- function(X_mat,
       res1 <- sapply(c(1:K), function(k) {
           k.idx = which(Cl[start_idx:end_idx] == k)
           if(length(k.idx)>0){
-              return( apply(Xt[, sample(k.idx,sample.cnt,replace=T)],1,sum) )
+              return( apply(Xt[, sample(k.idx,sample.cnt,replace=T)],1,sum) ) ## boostrap
+              ## return( apply(Xt[, k.idx],1,sum) )
           }else{
               return( matrix(0,nrow=D,ncol=1) )
           }
