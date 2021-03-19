@@ -27,7 +27,6 @@ generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
   Y_pseudo <- Y_pseudo/10000 #if X in TPM space
   rst$Y_pseudo <- Y_pseudo
   rst$prop <- est_prop
-  rst$YSG <- gene.list
   return(rst)
 }
 
@@ -124,5 +123,6 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
   rst <- ComBat_sc(dat = as.matrix(log2(Y_combine+1)), batch = batch)
   rst$bulk_to_sc <- (2^rst$bulk_to_sc)
   rst$before <- Y_combine
+  rst$YSG <- gene.list
   return(rst)
 }
