@@ -6,12 +6,12 @@ library(Ckmeans.1d.dp)
 source('Batch_Correction/run_liger.R')
 
 ## input demo
-taget_tissue <- 'PBMC'
-files = list.files(path = '/gpfs/ysm/home/bl666/HCL/Pseudo_Bulk',pattern = "*_updated.rds", full.names = TRUE)
-tissue_list <- c("BM","CB","Kidney","Liver","Lung","PBMC")
-celltype_used_list <- c("B", "Neutrophil", "NK cell", "T")
-YSG <- readRDS("/gpfs/ysm/pi/zhao-data/wd262/sc_immune/sc_immune/data/NSCLC/sg.list.rds")
-output_path = "/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/pipeline_on_HCL"
+# target_tissue <- 'PBMC'
+# files = list.files(path = '/gpfs/ysm/home/bl666/HCL/Pseudo_Bulk',pattern = "*_updated.rds", full.names = TRUE)
+# tissue_list <- c("BM","CB","Kidney","Liver","Lung","PBMC")
+# celltype_used_list <- c("B", "Neutrophil", "NK cell", "T")
+# YSG <- readRDS("/gpfs/ysm/pi/zhao-data/wd262/sc_immune/sc_immune/data/NSCLC/sg.list.rds")
+# output_path = "/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/pipeline_on_HCL"
 
 
 
@@ -27,10 +27,11 @@ get_tissue_specific_input <- function(target_tissue,tissue_list,celltype_used_li
     seur.TPM_list <- liger_output$seur.TPM_list
     seur_list <- liger_output$seur_list
     liger <- liger_output$liger
+    YSG <- liger_output$YSG
     if(output_path!=""){
         YSG <- intersect(YSG,liger@var.genes)
         W_tilde <- get_WH_W_tilde(liger,seur.TPM_list,seur_list)
-        target_idx <- which(tissue_list == taget_tissue)
+        target_idx <- which(tissue_list == target_tissue)
         tissue_gene_list <- get_tissue_gene(target_idx, W_tilde,tissue_list)
         w_tissue_indicator <- output_tissue_indicator(tissue_gene_list)
         w_tissue_indicator <- integrate_celltype(w_tissue_indicator,celltype_used_list,YSG)

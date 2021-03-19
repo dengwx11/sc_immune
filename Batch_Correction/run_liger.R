@@ -4,17 +4,19 @@ source("SAME/clean_format.R")
 run_liger <- function(files,tissue_list,YSG,output_path,liger.turnon){
     seur.TPM_list <- list()
     seur_list <- list()
+    allgenes_list <- list()
     for(i in seq(length(tissue_list))){
         seur <- readRDS(files[i]) ## counts
         seur <- NormalizeData(seur,normalization.method = "LogNormalize",scale.factor = 1000000)
         seur[["percent.mt"]] <- PercentageFeatureSet(seur, pattern = "^MT-")
         seur.TPM <- exp(GetAssayData(seur[['RNA']],slot='data'))-1
+        allgenes_list[[i]] <- rownames(seur.TPM)
         seur.TPM_list[[i]] <- seur.TPM
         seur_list[[i]] <- seur
     }
     names(seur.TPM_list) <- tissue_list
     names(seur_list)<- tissue_list
-    
+    YSG <- intersect(YSG, Reduce(intersect, allgenes_list))
     
     if(liger.turnon){
         liger <- createLiger(seur.TPM_list) 
@@ -42,6 +44,7 @@ run_liger <- function(files,tissue_list,YSG,output_path,liger.turnon){
     ans$seur.TPM_list <- seur.TPM_list
     ans$seur_list <- seur_list
     ans$liger <- liger
+    ans$YSG <- YSG
     return(ans)
     
 }

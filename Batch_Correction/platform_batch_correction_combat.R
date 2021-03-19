@@ -27,6 +27,7 @@ generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
   Y_pseudo <- Y_pseudo/10000 #if X in TPM space
   rst$Y_pseudo <- Y_pseudo
   rst$prop <- est_prop
+  rst$YSG <- gene.list
   return(rst)
 }
 
