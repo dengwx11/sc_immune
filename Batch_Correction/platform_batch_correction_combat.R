@@ -128,8 +128,8 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
 }
 
 #estimate cell type fractions by nnls.
-fraction_est <- function(Y0, SAME_rst, Celltype_used = "Celltype_used",
-                        target_tissue, celltype_used_list,
+fraction_est <- function(Y0, SAME_rst, 
+                        target_tissue, celltype_used_list,Celltype_used = "Celltype_used",
                         method = "nnls", adj.to.sc = TRUE
 ){
   YSG <- SAME_rst$YSG
