@@ -126,3 +126,32 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
   rst$YSG <- gene.list
   return(rst)
 }
+
+#estimate cell type fractions by nnls.
+fraction_est <- function(Y0, SAME_rst, Celltype_used = "Celltype_used",
+                        target_tissue, celltype_used_list,
+                        method = "nnls", adj.to.sc = TRUE
+){
+  YSG <- SAME_rst$YSG
+  vg <- SAME_rst$vg
+  rownames(vg) <- YSG
+  X <- SAME_rst$X[[target_tissue]]
+  N <- ncol(Y0)
+  if(adj.to.sc){
+    rst_bulk <- Y_batch_correct(Y0, X, YSG)
+    YSG <- rst_bulk$YSG
+    Y0_adj <- rst_bulk$bulk_to_sc
+    Y0_adj <- Y0_adj[YSG,] #TPM space
+  }else{
+    YSG <- intersect(YSG, rownames(Y0))
+    Y0_adj <- Y0[YSG,]
+  }
+  if(method == "nnls"){
+    z_est <- t(sapply(c(1:N), function(n) nnls(vg[YSG,],(Y0_sc[YSG,n]))$x))
+    rownames(z_est) <- celltype_used_list
+  }
+  rst <- list()
+  rst$z_est <- z_est
+  rst$YSG <- YSG
+  return(rst)
+}
