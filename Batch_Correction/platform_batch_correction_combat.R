@@ -148,7 +148,7 @@ fraction_est <- function(Y0, SAME_rst,
   }
   if(method == "nnls"){
     z_est <- t(sapply(c(1:N), function(n) nnls(vg[YSG,],(Y0_sc[YSG,n]))$x))
-    rownames(z_est) <- celltype_used_list
+    colnames(z_est) <- celltype_used_list
   }
   rst <- list()
   rst$z_est <- z_est
