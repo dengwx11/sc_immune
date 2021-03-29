@@ -1,4 +1,5 @@
 source("SAME/ComBat_sc.R")
+source("benchmarking/benchmarking.R")
 library(nnls)
 library(sva)
 set.seed(2020)
@@ -130,7 +131,7 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
 #estimate cell type fractions by nnls.
 fraction_est <- function(Y0, SAME_rst, 
                         target_tissue, celltype_used_list,Celltype_used = "Celltype_used",
-                        method = "nnls", adj.to.sc = TRUE
+                        method = c("tranSig","music","w_empirical","cibersortx"), adj.to.sc = TRUE, simulation=FALSE
 ){
   YSG <- SAME_rst$YSG
   vg <- SAME_rst$vg
@@ -146,12 +147,29 @@ fraction_est <- function(Y0, SAME_rst,
     YSG <- intersect(YSG, rownames(Y0))
     Y0_adj <- Y0[YSG,]
   }
-  if(method == "nnls"){
-    z_est <- t(sapply(c(1:N), function(n) nnls(vg[YSG,],(Y0_sc[YSG,n]))$x))
-    colnames(z_est) <- celltype_used_list
+    
+  rst <- list()  
+  if("tranSig" %in% method){
+    z_est_tranSig <- t(sapply(c(1:N), function(n) nnls(vg[YSG,],(Y0_adj[YSG,n]))$x))
+    colnames(z_est_tranSig) <- celltype_used_list
+    rst$z_est_tranSig <- z_est_tranSig                          
   }
-  rst <- list()
-  rst$z_est <- z_est
+  if("music" %in% method){
+    z_est_music <- t(run_music(X,Y0,YSG,method="music",simulation))
+    colnames(z_est_music) <- celltype_used_list  
+    rst$z_est_music <- z_est_music   
+  }
+  if("w_empirical" %in% method){
+    z_est_empirical <- t(run_music(X,Y0,YSG,method="nnls",simulation))
+    colnames(z_est_empirical) <- celltype_used_list  
+    rst$z_est_empirical <- z_est_empirical  
+  }
+  if("cibersortx" %in% method){
+      
+  }
+  
+  
+                         
   rst$YSG <- YSG
   return(rst)
 }

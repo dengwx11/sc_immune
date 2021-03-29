@@ -14,4 +14,4 @@ Y0 <- read.table("data/NSCLC/Fig2b-WholeBlood_RNAseq.txt", row.names = 1, header
 rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,mcmc_samples_theta1,
                 liger.turnon=FALSE,output_path)
 # rst_bulk <- Y_batch_correct(Y0, rst$X[[target_tissue]], rst$YSG)
-rst_frac <- fraction_est(Y0, rst,target_tissue, celltype_used_list)
+rst_frac <- fraction_est(Y0, rst,target_tissue, celltype_used_list,method = c("tranSig","music","w_empirical"), adj.to.sc = T)

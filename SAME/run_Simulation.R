@@ -45,8 +45,6 @@ generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
     same_input$true_w =  w_sim_output
 
     ## save other information
-    same_input$raw_X = X_sim_output
-
     if(T>1){
     c_k = Reduce(function(d1,d2){
     if(!is.numeric(d1)) return(cbind(as.matrix(d1$c_k,ncol=1),as.matrix(d2$c_k,ncol=1)))

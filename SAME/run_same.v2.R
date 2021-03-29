@@ -50,7 +50,7 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empi
     K = length(celltype_used_list)
     T = length(tissue_list)
     D = length(YSG)
-    Lambda = c(0:mcmc_samples_theta1)                         
+    Lambda = c(0:mcmc_samples_theta1)
     rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
                  mcmc_samples_theta1, Lambda, YSG)
@@ -125,6 +125,7 @@ SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
   
   ## SAME
   ptm <- proc.time()
+
   for(i in 1:mcmc_samples_theta1){
     ## Step 1: Update theta2 for Lambda[i] times
     print(Lambda[1:(i+1)])
