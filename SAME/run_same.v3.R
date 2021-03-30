@@ -1,4 +1,5 @@
-### do not update pi
+### update pi
+### costumize tau_v
 
 set.seed(2021)
 source("SAME/Update_theta1.v2.R")
@@ -23,7 +24,7 @@ source('Batch_Correction/get_tissue_specific_input.R')
 #                liger.turnon=FALSE,output_path)
 
 
-run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi,mcmc_samples_theta1,liger.turnon=TRUE,output_path){
+run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi,mcmc_samples_theta1,liger.turnon=TRUE,output_path, update.pi=TRUE,tau_v=0.6){
     
     ans <- get_tissue_specific_input(target_tissue,tissue_list,celltype_used_list,files,YSG,output_path,liger.turnon=liger.turnon)
     
@@ -55,7 +56,7 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empi
     Lambda = c(0:mcmc_samples_theta1)
     rst <- SAME(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
-                 mcmc_samples_theta1, Lambda, YSG)
+                 mcmc_samples_theta1, Lambda, YSG,tau_v)
     rst$w_tissue_indicator <- w_tissue_indicator
     rst$YSG <- YSG
     rst$X <- seur_list                         
@@ -64,7 +65,7 @@ run_SAME <- function(target_tissue,tissue_list,celltype_used_list,files,YSG,empi
 
 SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                  empirical_pi,
-                 mcmc_samples_theta1, Lambda, YSG)
+                 mcmc_samples_theta1, Lambda, YSG,tau_v)
 {
     
     ##### Input ######
@@ -80,7 +81,7 @@ SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
   ## Initialization (lower case)
   # Noninformative Prior Parameters
   
-  tau_v = 0.6
+  # tau_v = 0.6
   alpha_prior_e = 10^(-6)
   beta_prior_e = 10^(-6)
   alpha_prior_x = 10^(-6)
@@ -157,10 +158,10 @@ SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
                            tau_v=tau_v
       )
 
-        
-      # pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
-      #                                  alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
-      # )
+      if(update.pi)  
+      pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
+                                       alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
+      )
       
       tau_x_est[j+1,] <- update_tau_x(X_mat, w_tissue_indicator,
                       w_est, Cl, c_k,

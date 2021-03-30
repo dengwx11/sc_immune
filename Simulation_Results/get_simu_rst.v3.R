@@ -1,3 +1,4 @@
+## enabled to tune pi and tau_v
 options(stringsAsFactors=F)
 args = commandArgs(trailingOnly=TRUE)
 
@@ -10,13 +11,16 @@ tau_xd_beta_para <- as.numeric(args[6])
 mcmc_samples_theta1 <- as.numeric(args[7])
 seed <- as.integer(args[8])
 parameter <- as.character(args[9])
+tau_v <- as.numeric(args[10])
+update.pi <- as.logical(args[11])
+empirical_pi <- as.numeric(args[12])
 #parameter <- "corrupt" or "tissue_number" or "gene_number"
 
 print(mcmc_samples_theta1)
 
 set.seed(seed)
 setwd('/gpfs/ysm/pi/zhao-data/wd262/sc_immune/sc_immune')
-source('SAME/run_same.v2.R')
+source('SAME/run_same.v3.R')
 source('SAME/run_Simulation.R')
 source('Simulation_Results/prepare_simulation.R')
 source('Batch_Correction/platform_batch_correction_combat.R')
@@ -24,15 +28,13 @@ source('Batch_Correction/platform_batch_correction_combat.R')
 pi_ber = 0.3
 N = 200 # bulk Y sample size
 Iteration = 500 ## iteration number to get the largest angle between the vectors
-str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para)
+str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para,".tau_v=",tau_v,".update.pi=",update.pi,".empirical_pi=",empirical_pi)
 
 same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi)
-if(parameter == "corrupt"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",corrupt_pi*100)
-}else if(parameter == "tissue_number"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",T)
-}else if(parameter == "gene_number"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",D)
+if(parameter == "pi"){
+    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",empirical_pi)
+}else if(parameter == "tau_v"){
+    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",tau_v)
 }
 
 dir.create(output_directory)
@@ -47,8 +49,8 @@ output_path = ""
 Y0 <- read.table(paste0(output_directory, "/Y0.txt"), sep = " ")
 rownames(Y0) <- c(1:D)
 
-rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,mcmc_samples_theta1,
-                liger.turnon=FALSE,output_path)
+rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=empirical_pi,mcmc_samples_theta1,
+                liger.turnon=FALSE,output_path,update.pi=update.pi,tau_v=tau_v)
 
 rst_frac <- fraction_est(Y0, rst,target_tissue, celltype_used_list,method = c("tranSig","music","w_empirical"), adj.to.sc = F,simulation=T)
 
