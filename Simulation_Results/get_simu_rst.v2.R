@@ -26,13 +26,15 @@ N = 200 # bulk Y sample size
 Iteration = 500 ## iteration number to get the largest angle between the vectors
 str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para)
 
-same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi)
+same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi, unbalanced = TRUE)
 if(parameter == "corrupt"){
     output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",corrupt_pi*100)
 }else if(parameter == "tissue_number"){
     output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",T)
 }else if(parameter == "gene_number"){
     output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",D)
+}else if(parameter == "unbalanced"){
+    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",corrupt_pi*100)
 }
 
 dir.create(output_directory)
@@ -47,6 +49,7 @@ output_path = ""
 Y0 <- read.table(paste0(output_directory, "/Y0.txt"), sep = " ")
 rownames(Y0) <- c(1:D)
 
+rst[['X']] <- NULL
 rst <- run_SAME(target_tissue,tissue_list,celltype_used_list,files,YSG,empirical_pi=0.3,mcmc_samples_theta1,
                 liger.turnon=FALSE,output_path)
 

@@ -88,16 +88,27 @@ simulate_sigmat_w <- function(iteration, D, K, pi_ber, T){
 }
 
 #generate z
-generate_z <- function(K,N){
+generate_z <- function(K,N, unbalanced){
   Z <- matrix(0, nrow = K, ncol = N)
-  for (n in 1:N){
-    zn = 0
-    for (k in 1:(K-1)){
-      Z[k,n] = runif(1, min=0, max=(1-zn))
-      zn = zn + Z[k,n]
+    if(!unbalanced){
+          for (n in 1:N){
+            zn = 0
+            for (k in 1:(K-1)){
+              Z[k,n] = runif(1, min=0, max=(1-zn))
+              zn = zn + Z[k,n]
+            }
+            Z[K,n] = 1 - zn
+          }
+    }else{
+        for(k in 1:K){
+            zk_base <- abs(rnorm(1,1,100))
+            for(n in 1:N){
+                Z[k,n] = max(0,rnorm(1, mean=zk_base,sd=10))
+            }            
+        }
+        Z <- sapply(1:N,function(n) Z[,n]/sum(Z[,n]))
     }
-    Z[K,n] = 1 - zn
-  }
+
   return(Z)
 }
 
