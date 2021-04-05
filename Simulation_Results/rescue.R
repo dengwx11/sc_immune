@@ -24,6 +24,8 @@ if(parameter == "corrupt"){
     output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",T)
 }else if(parameter == "gene_number"){
     output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",D)
+}else if(parameter == "unbalanced"){
+    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter)
 }
     
     

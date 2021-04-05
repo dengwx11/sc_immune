@@ -10,9 +10,9 @@ library(Seurat)
 #N = 200 # bulk Y sample size
 #Iteration = 500 ## iteration number to get the largest angle between the vectors
 
-generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2){
+generate_same_input <- function(T,D,K,pi_ber,N,Iteration, corrupt_pi = 0.2, unbalanced = TRUE){
     w_sim_output <- simulate_sigmat_w(Iteration, D, K, pi_ber, T)
-    Z <- generate_z(K, N)
+    Z <- generate_z(K, N, unbalanced)
     X_sim_output <- simulate_X(D, K, w_sim_output, T,corrupt_pi)
     
 
