@@ -159,7 +159,7 @@ SAME <- function(X_mat,w_tissue_indicator,Cl,c_k,K,T,D,
       )
 
       if(update.pi)  
-      pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], 
+      pi_ber_est[j+1] <- update_pi_est(gamma_est[[k]], D, K,
                                        alpha_pi = alpha_prior_pi, beta_pi = beta_prior_pi
       )
       

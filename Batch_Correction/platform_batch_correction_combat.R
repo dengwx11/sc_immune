@@ -2,6 +2,7 @@ source("SAME/ComBat_sc.R")
 source("benchmarking/benchmarking.R")
 library(nnls)
 library(sva)
+require(quadprog)
 set.seed(2020)
 #generate pseudo bulk from single cell dataset, and return a result list of TPM pseudo bulk and cell type proprtion
 generate_pseudobulk <- function(X, YSG, Celltype_used = "Celltype_used"){
@@ -131,7 +132,7 @@ Y_batch_correct <- function(Y0, X, YSG, Celltype_used = "Celltype_used"){
 #estimate cell type fractions by nnls.
 fraction_est <- function(Y0, SAME_rst, 
                         target_tissue, celltype_used_list,Celltype_used = "Celltype_used",
-                        method = c("tranSig","music","w_empirical","cibersortx"), adj.to.sc = TRUE, simulation=FALSE
+                        method = c("tranSig","music","w_empirical","cibersortx","quadprog"), adj.to.sc = TRUE, simulation=FALSE
 ){
   YSG <- SAME_rst$YSG
   vg <- SAME_rst$vg
@@ -164,6 +165,11 @@ fraction_est <- function(Y0, SAME_rst,
     colnames(z_est_empirical) <- celltype_used_list  
     rst$z_est_empirical <- z_est_empirical  
   }
+  if("quadprog" %in% method){
+    z_est_tranSig_qp <- t(sapply(c(1:N), function(n) run_quadprog(n, vg, Y0_adj, YSG)))
+    colnames(z_est_tranSig_qp) <- celltype_used_list
+    rst$z_est_tranSig_qp <- z_est_tranSig_qp   
+  }
   if("cibersortx" %in% method){
       
   }
@@ -172,4 +178,16 @@ fraction_est <- function(Y0, SAME_rst,
                          
   rst$YSG <- YSG
   return(rst)
+}
+
+run_quadprog <- function(n, sigmat, Y0, YSG){
+  K <- ncol(sigmat)
+  Dmat <- t(sigmat[YSG,]) %*% sigmat[YSG,]
+  dvec <- t(Y0_sc[YSG,n]) %*% sigmat[YSG,]
+  tmp <- matrix(rep(0, K*(K)), ncol = K, nrow = K)
+  for(i in 1:K){tmp[i,i] = 1}
+  Amat <- t(tmp)
+  bvec <- c(rep(0,K))
+  rst_qp <- solve.QP(Dmat,dvec, Amat, bvec)
+  return(rst_qp$solution)
 }

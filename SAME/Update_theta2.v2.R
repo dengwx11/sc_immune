@@ -64,7 +64,7 @@ update_v <- function(tau_w, W_T, gamma,W_T_indicator,
 }
 
 #update pi_est
-update_pi_est <- function(gamma, 
+update_pi_est <- function(gamma, D, K,
                           alpha_pi = 10^(-6), beta_pi = 10^(-6)
 ){                                                                
   para1 <- alpha_pi + sum(gamma)
