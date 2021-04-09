@@ -1,5 +1,4 @@
 source("SAME/Simulation.R")
-set.seed(2020)
 library(Seurat)
 
 

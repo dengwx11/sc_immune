@@ -6,6 +6,7 @@ run_liger <- function(files,tissue_list,YSG,output_path,liger.turnon){
     seur_list <- list()
     allgenes_list <- list()
     for(i in seq(length(tissue_list))){
+        print(files[i])
         seur <- readRDS(files[i]) ## counts
         seur <- NormalizeData(seur,normalization.method = "LogNormalize",scale.factor = 1000000)
         seur[["percent.mt"]] <- PercentageFeatureSet(seur, pattern = "^MT-")
