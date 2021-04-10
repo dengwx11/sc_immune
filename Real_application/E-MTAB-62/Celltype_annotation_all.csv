@@ -367,3 +367,28 @@ Oligodendrocyte progenitor cell,Oligodendrocyte,Adult-Cerebellum
 Smooth muscle cell,Smooth muscle cell,Adult-Cerebellum
 Stromal cell,Stromal cell,Adult-Cerebellum
 T cell,T cell,Adult-Cerebellum
+B cell (Centrocyte),B cell,Cord-Blood
+B cell(Centrocyte),B cell,Cord-Blood
+B cell(Plasmocyte),B cell,Cord-Blood
+B cell(Unknown),B cell,Cord-Blood
+Conventional dendritic cell,Dendritic cell,Cord-Blood
+Dendritic cell,Dendritic cell,Cord-Blood
+Eosinophil,Eosinophil,Cord-Blood
+Erythroid cell,Erythroid cell,Cord-Blood
+Erythroid/Basophil Progenitor,Erythroid cell,Cord-Blood
+HSPC,HSPC,Cord-Blood
+Megakaryocyte,Megakaryocyte,Cord-Blood
+Monocyte,Monocyte,Cord-Blood
+Neutrophil,Neutrophil,Cord-Blood
+NK cell,Natural killer cell,Cord-Blood
+Plasmacytoid dendritic cell,Dendritic cell,Cord-Blood
+Proliferating cell,Proliferating cell,Cord-Blood
+T cell,T cell,Cord-Blood
+Dendritic cell,Dendritic cell,Cord-Blood-CD34P
+Eosinophil,Eosinophil,Cord-Blood-CD34P
+Erythroid/Basophil Progenitor,Erythroid cell,Cord-Blood-CD34P
+HSPC,HSPC,Cord-Blood-CD34P
+Megakaryocyte,Megakaryocyte,Cord-Blood-CD34P
+Neutrophil,Neutrophil,Cord-Blood-CD34P
+NK cell,Natural killer cell,Cord-Blood-CD34P
+Proliferating cell,Proliferating cell,Cord-Blood-CD34P
