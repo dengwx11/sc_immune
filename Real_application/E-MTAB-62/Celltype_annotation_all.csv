@@ -393,3 +393,27 @@ Neutrophil,Neutrophil,Cord-Blood-CD34P
 NK cell,Natural killer cell,Cord-Blood-CD34P
 Proliferating cell,Proliferating cell,Cord-Blood-CD34P
 Monocyte,Monocyte,Cord-Blood-CD34P
+Airway smooth muscle cell,Smooth muscle cell,Fetal-Lung
+Basal stem cell,Basal cell,Fetal-Lung
+CD8 T cell,T cell,Fetal-Lung
+Chondrocyte,Bronchial chondrocyte,Fetal-Lung
+Distal  cell,(DELETED),Fetal-Lung
+Distal progenitor cell,(DELETED),Fetal-Lung
+Endothelial cell,Endothelial cell,Fetal-Lung
+Erythroid cell,Erythroid cell,Fetal-Lung
+Fibroblast,Fibroblast,Fetal-Lung
+Lung mesenchyme cell (cardiopulmonary progenitor),Mesenchymal cell,Fetal-Lung
+Macrophage,Macrophage,Fetal-Lung
+Megakaryocyte/Erythtoid progenitor cell,Megakaryocyte,Fetal-Lung
+Neuron,Neuron,Fetal-Lung
+Neutrophil,Neutrophil,Fetal-Lung
+NK cell,Natural killer cell,Fetal-Lung
+Pericyte,Pericyte,Fetal-Lung
+Proliferating cell,Proliferating cell,Fetal-Lung
+Proliferating lung mesenchyme cell,Mesenchymal cell,Fetal-Lung
+Proliferating smooth muscle cell,Smooth muscle cell,Fetal-Lung
+Proliferating T cell,Proliferating T cell,Fetal-Lung
+Proximal progenitor cell,(DELETED),Fetal-Lung
+Smooth muscle cell,Smooth muscle cell,Fetal-Lung
+T cell,T cell,Fetal-Lung
+Vascular smooth muscle cell,Vascular smooth muscle cell,Fetal-Lung
