@@ -35,15 +35,19 @@ N = 200 # bulk Y sample size
 Iteration = 500 ## iteration number to get the largest angle between the vectors
 str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para,".seed=",seed)
 
-same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi, unbalanced = TRUE)
+
+same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi, unbalanced = FALSE,seed=seed)
+
+#dir <- "/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/"
+dir <- "/ysm-gpfs/scratch60/wd262/sc_immune/simulation/"
 if(parameter == "corrupt"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",corrupt_pi*100)
+    output_directory <- paste0(dir,parameter,"/",corrupt_pi*100)
 }else if(parameter == "tissue_number"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",T)
+    output_directory <- paste0(dir,parameter,"/",T)
 }else if(parameter == "gene_number"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",D)
+    output_directory <- paste0(dir,parameter,"/",D)
 }else if(parameter == "unbalanced"){
-    output_directory <- paste0("/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/",parameter,"/",corrupt_pi*100)
+    output_directory <- paste0(dir,parameter,"/",corrupt_pi*100)
 }
     
 dir.create(output_directory)    
@@ -70,3 +74,5 @@ rst[['X']] <- NULL
 mydir <- paste0("/gpfs/ysm/pi/zhao-data/wd262/sc_immune/write/simulation_rst/",parameter)            
 saveRDS(rst,paste0(mydir,"/rst.",str_para,'.rds'))
 saveRDS(rst_frac,paste0(mydir,"/rst_frac.",str_para,'.rds'))
+
+sapply(paste0(output_directory,'/X_', 2:T, ".rds"), unlink)
