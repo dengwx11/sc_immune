@@ -1,5 +1,5 @@
 ## tissue_number
-files_input = list.files(path = '/gpfs/ysm/scratch60/cpsc424/wd262/sc_immune/simulation/tissue_number',pattern = "*", full.names = TRUE)
+files_input = list.files(path = '/gpfs/loomis/scratch60/zhao/wd262/sc_immune/forBolun/simulation/tissue_number',pattern = "*", full.names = TRUE)
 tissue_number_list <- sapply(files_input, basename)
 files_input <- as.vector(sapply(files_input, function(file) paste0(file,'/',c(101:115),'/')))
 files_W_empirical = as.vector(sapply(files_input, function(file) paste0(file,'W_empirical.txt')))
@@ -14,7 +14,7 @@ tissue_number_list <- rep(tissue_number_list,each=15)
                             
                             
 ## gene_number
-files_input = list.files(path = '/gpfs/ysm/scratch60/cpsc424/wd262/sc_immune/simulation/gene_number',pattern = "*", full.names = TRUE)
+files_input = list.files(path = '/gpfs/loomis/scratch60/zhao/wd262/sc_immune/forBolun/simulation/gene_number',pattern = "*", full.names = TRUE)
 gene_number_list <- sapply(files_input, basename)
 files_input <- as.vector(sapply(files_input, function(file) paste0(file,'/',c(101:115),'/')))
 files_W_empirical = as.vector(sapply(files_input, function(file) paste0(file,'W_empirical.txt')))
