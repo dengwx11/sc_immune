@@ -417,3 +417,73 @@ Proximal progenitor cell,(DELETED),Fetal-Lung
 Smooth muscle cell,Smooth muscle cell,Fetal-Lung
 T cell,T cell,Fetal-Lung
 Vascular smooth muscle cell,Vascular smooth muscle cell,Fetal-Lung
+B cell (Plasmocyte),B cell,Adult-Liver
+Hepatocyte,Hepatocyte,Adult-Liver
+Sinusoidal endothelial cell,Sinusoidal endothelial cell,Adult-Liver
+Activated T cell,activative T cell,Adult-Liver
+Myeloid cell,Myeloid cell,Adult-Liver
+Vascular endothelial cell,Endothelial cell,Adult-Liver
+Neutrophil,Neutrophil,Adult-Liver
+Motile liver macrophage,Motile liver macrophage,Adult-Liver
+Kuppfer cell,Kuppfer cell,Adult-Liver
+Macrophage,macrophage,Adult-Liver
+Epithelial cell,Epithelial cell,Adult-Liver
+Mast cell,Mast cell,Adult-Liver
+Dendritic cell,Dendritic cell,Adult-Liver
+Conventional dendritic cell,Dendritic cell,Adult-Liver
+Kuppfer Cell,Kuppfer cell,Adult-Liver
+Smooth muscle cell,Smooth muscle cell,Adult-Liver
+Proliferating cell,(DELETED),Adult-Liver
+Granulocyte,Granulocyte,Adult-Liver
+B cell (Plasmocyte),B cell,Adult-Duodenum
+T cell,T cell,Adult-Duodenum
+Enterocyte,Enterocyte,Adult-Duodenum
+Goblet cell,Goblet cell,Adult-Duodenum
+Gastric chief cell,Gastric chief cell,Adult-Duodenum
+Mast cell,Mast cell,Adult-Duodenum
+Enterocyte progenitor,Enterocyte,Adult-Duodenum
+Contamination,(DELETED),Adult-Duodenum
+Endothelial  cell,Endothelial cell,Adult-Duodenum
+Fibroblast,FIbroblast,Adult-Duodenum
+Macrophage,Macrophage,Adult-Duodenum
+Immune response stromal cell,Immune response stromal cell,Adult-Gallbladder
+Macrophage,Macrophage,Adult-Gallbladder
+Epithelial progenitor cell,Epithelial cell,Adult-Gallbladder
+T cell,T cell,Adult-Gallbladder
+Endothelial cell,Endothelial cell,Adult-Gallbladder
+Stromal cell,Stromal cell,Adult-Gallbladder
+Inflammatory stromal cell,Inflammatory stromal cell,Adult-Gallbladder
+Mucous epithelial cell,Mucosal cell,Adult-Gallbladder
+Epithelial cell,Epithelial cell,Adult-Gallbladder
+Mast cell,Mast cell,Adult-Gallbladder
+Neutrophil,Neutrophil,Adult-Gallbladder
+Smooth muscle cell,Smooth muscle cell,Adult-Gallbladder
+Antigen presenting cell,(DELETED),Adult-Gallbladder
+Lymphocyte,(DELETED),Adult-Gallbladder
+Dendritic cell,Dendritic cell,Adult-Gallbladder
+Fibroblast,Fibroblast,Adult-Gallbladder
+B cell(Plasmocyte),B cell,Adult-Gallbladder
+B cell(Plasmocyte),B cell,Adult-Jejunum
+Enterocyte,Enterocyte,Adult-Jejunum
+Enterocyte progenitor,Enterocyte,Adult-Jejunum
+Paneth cell,Paneth cell,Adult-Jejunum
+Goblet cell,Goblet cell,Adult-Jejunum
+Fibroblast,Fibroblast,Adult-Jejunum
+X/A cell,X/A cell,Adult-Jejunum
+Dendritic cell,Dendritic cell,Adult-Jejunum
+T cell,T cell,Adult-Jejunum
+Macrophage,Macrophage,Adult-Jejunum
+Endothelial cell,Endothelial cell,Adult-Jejunum
+Mast cell,Mast cell,Adult-Jejunum
+Smooth muscle cell,Smooth muscle cell,Adult-Jejunum
+Enterocyte,Enterocyte,Adult-Rectum
+B cell(Plasmocyte),B cell,Adult-Rectum
+B cell,B cell,Adult-Rectum
+Mast cell,Mast cell,Adult-Rectum
+Enteric glial cell,Enteric glial cell,Adult-Rectum
+Inflammed  epithelial cell,Epithelial cell,Adult-Rectum
+Macrophage,Macrophage,Adult-Rectum
+T cell,T cell,Adult-Rectum
+Goblet cell,Goblet cell,Adult-Rectum
+Stromal cell,Stromal cell,Adult-Rectum
+Smooth muscle cell,Smooth muscle cell,Adult-Rectum
