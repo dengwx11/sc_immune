@@ -1,3 +1,20 @@
+## corruption rate
+files_input = list.files(path = '/gpfs/loomis/scratch60/zhao/wd262/sc_immune/forBolun/simulation/corrupt_unbalanced',pattern = "*", full.names = TRUE)
+corrupt_rate_list <- as.numeric(sapply(files_input, basename))/100
+files_input <- as.vector(sapply(files_input, function(file) paste0(file,'/',c(101:115),'/')))
+files_W_empirical = as.vector(sapply(files_input, function(file) paste0(file,'W_empirical.txt')))
+files_W_transig = as.vector(sapply(files_input, function(file) paste0(file,'W_transig.txt')))
+files_Y0 = as.vector(sapply(files_input, function(file) paste0(file,'Y0.txt')))   
+                                    
+                                    
+names(corrupt_rate_list) <- NULL
+corrupt_rate_list <- as.numeric(corrupt_rate_list)
+#tissue_number_list <- sort(tissue_number_list)
+corrupt_rate_list <- rep(corrupt_rate_list,each=15)
+                                    
+
+
+
 ## tissue_number
 files_input = list.files(path = '/gpfs/loomis/scratch60/zhao/wd262/sc_immune/forBolun/simulation/tissue_number',pattern = "*", full.names = TRUE)
 tissue_number_list <- sapply(files_input, basename)

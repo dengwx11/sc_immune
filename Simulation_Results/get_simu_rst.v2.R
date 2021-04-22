@@ -36,11 +36,11 @@ Iteration = 500 ## iteration number to get the largest angle between the vectors
 str_para = paste0("T=",T,".D=",D,".K=",K,".corrupt=",corrupt_pi,".tauW=",tau_w_para,".tauXdBeta=",tau_xd_beta_para,".seed=",seed)
 
 
-same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi, unbalanced = FALSE,seed=seed)
+same_input <- generate_same_input(T,D,K,pi_ber,N,Iteration,corrupt_pi=corrupt_pi, unbalanced = TRUE,seed=seed)
 
 #dir <- "/gpfs/loomis/scratch60/zhao/wd262/sc_immune/simulation/"
 dir <- "/ysm-gpfs/scratch60/wd262/sc_immune/simulation/"
-if(parameter == "corrupt"){
+if(parameter == "corrupt_unbalanced" || parameter == "corrupt_balanced"){
     output_directory <- paste0(dir,parameter,"/",corrupt_pi*100)
 }else if(parameter == "tissue_number"){
     output_directory <- paste0(dir,parameter,"/",T)
