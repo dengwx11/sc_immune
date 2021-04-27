@@ -1,0 +1,116 @@
+Attaching SeuratObject
+Loading required package: cowplot
+Loading required package: Matrix
+Loading required package: patchwork
+
+Attaching package: ‘patchwork’
+
+The following object is masked from ‘package:cowplot’:
+
+    align_plots
+
+Loading required package: Biobase
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following object is masked from ‘package:rliger’:
+
+    normalize
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which.max, which.min
+
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+Loading required package: AnnotationDbi
+Loading required package: stats4
+Loading required package: IRanges
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:Matrix’:
+
+    expand
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: mgcv
+Loading required package: nlme
+
+Attaching package: ‘nlme’
+
+The following object is masked from ‘package:IRanges’:
+
+    collapse
+
+This is mgcv 1.8-33. For overview type 'help("mgcv-package")'.
+Loading required package: genefilter
+
+Attaching package: ‘genefilter’
+
+The following object is masked from ‘package:patchwork’:
+
+    area
+
+Loading required package: BiocParallel
+Loading required package: quadprog
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Adipose_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Artery_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Bone-Marrow_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Esophagus_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Kidney_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Liver_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+[1] "/gpfs/loomis/pi/zhao2/wd262/shared_data/HCL/seurat_object/integrate_seurat_obj/protein_coding_new_celltype/Adult/Adult-Lung_protein_coding_integrated_rmbatch.rds"
+Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|

@@ -21,7 +21,7 @@ run_liger <- function(files,tissue_list,YSG,output_path,liger.turnon){
     
     if(liger.turnon){
         liger <- createLiger(seur.TPM_list) 
-        liger <- normalize(liger)
+        liger <- rliger::normalize(liger)
         liger <- selectGenes(liger)
         liger@var.genes <- intersect(YSG,liger@var.genes)
 
